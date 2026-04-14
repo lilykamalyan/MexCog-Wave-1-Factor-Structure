@@ -447,4 +447,4 @@ gcp_final_hhid
 
 gcp_final_hhid <- readModels("gcp_final_hhid.out")
 
-gcp_final_hhid$output[900:1300]
+gcp_final_hhid$output
