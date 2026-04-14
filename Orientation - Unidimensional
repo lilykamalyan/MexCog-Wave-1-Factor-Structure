@@ -6,8 +6,7 @@ INPUT INSTRUCTIONS
 
 TITLE: ORIENTATION
 
-DATA:	
-            FILE IS C:\Users\lk2681.MC\R Files\mexcog2016_forcfa_040726_USE.dat;
+DATA:  FILE IS C:\Users\lk2681.MC\R Files\mexcog2016_forcfa_040726_USE.dat;
             FORMAT IS FREE;
 
 VARIABLE: NAMES ARE id age sex locality yrschool
@@ -41,448 +40,63 @@ MODEL:    orien BY day-state;
 OUTPUT: SAMPSTAT STANDARDIZED MODINDICES(3.84) TECH4;
 
 
-*** WARNING
-  Data set contains cases with missing on all variables.
-  These cases were not included in the analysis.
-  Number of cases with missing on all variables:  1
-   1 WARNING(S) FOUND IN THE INPUT INSTRUCTIONS
 
-
-ORIENTATION 
-
-SUMMARY OF ANALYSIS
-
-Number of groups                                                 1
-Number of observations                                        2041
-
-Number of dependent variables                                    6
-Number of independent variables                                  0
-Number of continuous latent variables                            1
-
-Observed dependent variables
-
-  Binary and ordered categorical (ordinal)
-   DAY         MONTH       YEAR        WKDAY       COUNTRY     STATE
-
-Continuous latent variables
-   ORIEN
-
-Variables with special functions
-
-  ID variable           ID
-
-Estimator                                                    WLSMV
-Maximum number of iterations                                  1000
-Convergence criterion                                    0.500D-04
-Maximum number of steepest descent iterations                   20
-Maximum number of iterations for H1                           2000
-Convergence criterion for H1                             0.100D-03
-Parameterization                                             DELTA
-Link                                                        PROBIT
-
-Input data file(s)
-  C:\Users\lk2681.MC\R Files\mexcog2016_forcfa_040726_USE.dat
-
-Input data format  FREE
-
-
-SUMMARY OF DATA
-
-     Number of missing data patterns            20
-
-
-COVARIANCE COVERAGE OF DATA
-
-Minimum covariance coverage value   0.100
-
-
-     PROPORTION OF DATA PRESENT
-
-
-           Covariance Coverage
-              DAY           MONTH         YEAR          WKDAY         COUNTRY
-              ________      ________      ________      ________      ________
- DAY            0.989
- MONTH          0.979         0.984
- YEAR           0.973         0.973         0.977
- WKDAY          0.974         0.968         0.962         0.983
- COUNTRY        0.988         0.983         0.976         0.980         0.997
- STATE          0.986         0.982         0.976         0.978         0.994
-
-
-           Covariance Coverage
-              STATE
-              ________
- STATE          0.995
-
-
-UNIVARIATE PROPORTIONS AND COUNTS FOR CATEGORICAL VARIABLES
-
-    DAY
-      Category 1    0.347          701.000
-      Category 2    0.653         1318.000
-    MONTH
-      Category 1    0.103          206.000
-      Category 2    0.897         1802.000
-    YEAR
-      Category 1    0.259          517.000
-      Category 2    0.741         1477.000
-    WKDAY
-      Category 1    0.053          106.000
-      Category 2    0.947         1900.000
-    COUNTRY
-      Category 1    0.331          674.000
-      Category 2    0.669         1361.000
-    STATE
-      Category 1    0.174          354.000
-      Category 2    0.826         1677.000
-
-
-SAMPLE STATISTICS
-
-
-     ESTIMATED SAMPLE STATISTICS
-
-
-           MEANS/INTERCEPTS/THRESHOLDS
-              DAY$1         MONTH$1       YEAR$1        WKDAY$1       COUNTRY$
-              ________      ________      ________      ________      ________
-               -0.393        -1.267        -0.646        -1.618        -0.437
-
-
-           MEANS/INTERCEPTS/THRESHOLDS
-              STATE$1
-              ________
-               -0.937
-
-
-           CORRELATION MATRIX (WITH VARIANCES ON THE DIAGONAL)
-              DAY           MONTH         YEAR          WKDAY         COUNTRY
-              ________      ________      ________      ________      ________
- DAY
- MONTH          0.581
- YEAR           0.486         0.678
- WKDAY          0.369         0.467         0.469
- COUNTRY        0.217         0.380         0.450         0.151
- STATE          0.312         0.412         0.469         0.227         0.615
-
-
-           CORRELATION MATRIX (WITH VARIANCES ON THE DIAGONAL)
-              STATE
-              ________
-
-
-THE MODEL ESTIMATION TERMINATED NORMALLY
-
-
-
-MODEL FIT INFORMATION
-
-Number of Free Parameters                       12
-
-Chi-Square Test of Model Fit
-
-          Value                            165.505*
-          Degrees of Freedom                     9
-          P-Value                           0.0000
-
-*   The chi-square value for MLM, MLMV, MLR, ULSMV, WLSM and WLSMV cannot be used
-    for chi-square difference testing in the regular way.  MLM, MLR and WLSM
-    chi-square difference testing is described on the Mplus website.  MLMV, WLSMV,
-    and ULSMV difference testing is done using the DIFFTEST option.
-
-RMSEA (Root Mean Square Error Of Approximation)
-
-          Estimate                           0.092
-          90 Percent C.I.                    0.080  0.105
-          Probability RMSEA <= .05           0.000
-
-CFI/TLI
-
-          CFI                                0.912
-          TLI                                0.854
-
-Chi-Square Test of Model Fit for the Baseline Model
-
-          Value                           1798.280
-          Degrees of Freedom                    15
-          P-Value                           0.0000
-
-SRMR (Standardized Root Mean Square Residual)
-
-          Value                              0.079
-
-Optimum Function Value for Weighted Least-Squares Estimator
-
-          Value                     0.27469667D-01
-
-
-
-MODEL RESULTS
-
-                                                    Two-Tailed
-                    Estimate       S.E.  Est./S.E.    P-Value
-
- ORIEN    BY
-    DAY                1.000      0.000    999.000    999.000
-    MONTH              1.400      0.088     15.903      0.000
-    YEAR               1.370      0.076     17.992      0.000
-    WKDAY              0.876      0.099      8.821      0.000
-    COUNTRY            1.045      0.073     14.304      0.000
-    STATE              1.164      0.076     15.306      0.000
-
- Thresholds
-    DAY$1             -0.393      0.029    -13.695      0.000
-    MONTH$1           -1.267      0.038    -33.454      0.000
-    YEAR$1            -0.646      0.030    -21.306      0.000
-    WKDAY$1           -1.618      0.046    -34.908      0.000
-    COUNTRY$1         -0.437      0.029    -15.177      0.000
-    STATE$1           -0.937      0.033    -28.630      0.000
-
- Variances
-    ORIEN              0.337      0.033     10.257      0.000
-
-
-QUALITY OF NUMERICAL RESULTS
-
-     Condition Number for the Information Matrix              0.297E-02
-       (ratio of smallest to largest eigenvalue)
-
-
-IRT PARAMETERIZATION
-
-                                                    Two-Tailed
-                    Estimate       S.E.  Est./S.E.    P-Value
-
- Item Discriminations
-
- ORIEN    BY
-    DAY                0.712      0.052     13.608      0.000
-    MONTH              1.393      0.168      8.287      0.000
-    YEAR               1.309      0.109     12.029      0.000
-    WKDAY              0.590      0.085      6.934      0.000
-    COUNTRY            0.763      0.059     12.961      0.000
-    STATE              0.916      0.077     11.871      0.000
-
- Item Difficulties
-    DAY$1             -0.677      0.059    -11.437      0.000
-    MONTH$1           -1.559      0.082    -19.076      0.000
-    YEAR$1            -0.812      0.046    -17.770      0.000
-    WKDAY$1           -3.185      0.361     -8.815      0.000
-    COUNTRY$1         -0.720      0.060    -12.035      0.000
-    STATE$1           -1.387      0.083    -16.700      0.000
-
- Variances
-    ORIEN              1.000      0.000      0.000      1.000
-
-
-STANDARDIZED MODEL RESULTS
-
-
-STDYX Standardization
-
-                                                    Two-Tailed
-                    Estimate       S.E.  Est./S.E.    P-Value
-
- ORIEN    BY
-    DAY                0.580      0.028     20.513      0.000
-    MONTH              0.812      0.033     24.378      0.000
-    YEAR               0.795      0.024     32.645      0.000
-    WKDAY              0.508      0.054      9.345      0.000
-    COUNTRY            0.606      0.030     20.502      0.000
-    STATE              0.676      0.031     21.840      0.000
-
- Thresholds
-    DAY$1             -0.393      0.029    -13.695      0.000
-    MONTH$1           -1.267      0.038    -33.454      0.000
-    YEAR$1            -0.646      0.030    -21.306      0.000
-    WKDAY$1           -1.618      0.046    -34.908      0.000
-    COUNTRY$1         -0.437      0.029    -15.177      0.000
-    STATE$1           -0.937      0.033    -28.630      0.000
-
- Variances
-    ORIEN              1.000      0.000    999.000    999.000
-
-
-STDY Standardization
-
-                                                    Two-Tailed
-                    Estimate       S.E.  Est./S.E.    P-Value
-
- ORIEN    BY
-    DAY                0.580      0.028     20.513      0.000
-    MONTH              0.812      0.033     24.378      0.000
-    YEAR               0.795      0.024     32.645      0.000
-    WKDAY              0.508      0.054      9.345      0.000
-    COUNTRY            0.606      0.030     20.502      0.000
-    STATE              0.676      0.031     21.840      0.000
-
- Thresholds
-    DAY$1             -0.393      0.029    -13.695      0.000
-    MONTH$1           -1.267      0.038    -33.454      0.000
-    YEAR$1            -0.646      0.030    -21.306      0.000
-    WKDAY$1           -1.618      0.046    -34.908      0.000
-    COUNTRY$1         -0.437      0.029    -15.177      0.000
-    STATE$1           -0.937      0.033    -28.630      0.000
-
- Variances
-    ORIEN              1.000      0.000    999.000    999.000
-
-
-STD Standardization
-
-                                                    Two-Tailed
-                    Estimate       S.E.  Est./S.E.    P-Value
-
- ORIEN    BY
-    DAY                0.580      0.028     20.513      0.000
-    MONTH              0.812      0.033     24.378      0.000
-    YEAR               0.795      0.024     32.645      0.000
-    WKDAY              0.508      0.054      9.345      0.000
-    COUNTRY            0.606      0.030     20.502      0.000
-    STATE              0.676      0.031     21.840      0.000
-
- Thresholds
-    DAY$1             -0.393      0.029    -13.695      0.000
-    MONTH$1           -1.267      0.038    -33.454      0.000
-    YEAR$1            -0.646      0.030    -21.306      0.000
-    WKDAY$1           -1.618      0.046    -34.908      0.000
-    COUNTRY$1         -0.437      0.029    -15.177      0.000
-    STATE$1           -0.937      0.033    -28.630      0.000
-
- Variances
-    ORIEN              1.000      0.000    999.000    999.000
-
-
-R-SQUARE
-
-    Observed                                        Two-Tailed   Residual
-    Variable        Estimate       S.E.  Est./S.E.    P-Value    Variance
-
-    DAY                0.337      0.033     10.257      0.000      0.663
-    MONTH              0.660      0.054     12.189      0.000      0.340
-    YEAR               0.632      0.039     16.322      0.000      0.368
-    WKDAY              0.258      0.055      4.673      0.000      0.742
-    COUNTRY            0.368      0.036     10.251      0.000      0.632
-    STATE              0.456      0.042     10.920      0.000      0.544
-
-
-MODEL MODIFICATION INDICES
-
-NOTE:  Modification indices for direct effects of observed dependent variables
-regressed on covariates and residual covariances among observed dependent
-variables may not be included.  To include these, request MODINDICES (ALL).
-
-Minimum M.I. value for printing the modification index     3.840
-
-                                   M.I.     E.P.C.  Std E.P.C.  StdYX E.P.C.
-
-No modification indices above the minimum value.
-
-
-
-TECHNICAL 4 OUTPUT
-
-
-     ESTIMATES DERIVED FROM THE MODEL
-
-
-           ESTIMATED MEANS FOR THE LATENT VARIABLES
-              ORIEN
-              ________
-                0.000
-
-
-           ESTIMATED COVARIANCE MATRIX FOR THE LATENT VARIABLES
-              ORIEN
-              ________
- ORIEN          0.337
-
-
-           ESTIMATED CORRELATION MATRIX FOR THE LATENT VARIABLES
-              ORIEN
-              ________
- ORIEN          1.000
-
-
-     ESTIMATES DERIVED FROM THE MODEL
-
-
-           S.E. FOR ESTIMATED MEANS FOR THE LATENT VARIABLES
-              ORIEN
-              ________
-                0.000
-
-
-           EST./S.E. FOR ESTIMATED MEANS FOR THE LATENT VARIABLES
-              ORIEN
-              ________
-                0.000
-
-
-           TWO-TAILED P-VALUE FOR ESTIMATED MEANS FOR THE LATENT VARIABLES
-              ORIEN
-              ________
-                1.000
-
-
-           S.E. FOR ESTIMATED COVARIANCE MATRIX FOR THE LATENT VARIABLES
-              ORIEN
-              ________
- ORIEN          0.033
-
-
-           EST./S.E. FOR ESTIMATED COVARIANCE MATRIX FOR THE LATENT VARIABLES
-              ORIEN
-              ________
- ORIEN         10.257
-
-
-           TWO-TAILED P-VALUE FOR ESTIMATED COVARIANCE MATRIX FOR THE LATENT VARIABLES
-              ORIEN
-              ________
- ORIEN          0.000
-
-
-           S.E. FOR ESTIMATED CORRELATION MATRIX FOR THE LATENT VARIABLES
-              ORIEN
-              ________
- ORIEN          0.000
-
-
-           EST./S.E. FOR ESTIMATED CORRELATION MATRIX FOR THE LATENT VARIABLES
-              ORIEN
-              ________
- ORIEN        999.000
-
-
-           TWO-TAILED P-VALUE FOR ESTIMATED CORRELATION MATRIX FOR THE LATENT VARIABLES
-              ORIEN
-              ________
- ORIEN          0.000
-
-
-DIAGRAM INFORMATION
-
-  Use View Diagram under the Diagram menu in the Mplus Editor to view the diagram.
-  If running Mplus from the Mplus Diagrammer, the diagram opens automatically.
-
-  Diagram output
-    c:\users\lk2681.mc\onedrive - columbia university irving medical center\taub\1st author\mexcog factor structure\data
-
-     Beginning Time:  12:49:17
-        Ending Time:  12:49:17
-       Elapsed Time:  00:00:00
-
-
-
-MUTHEN & MUTHEN
-3463 Stoner Ave.
-Los Angeles, CA  90066
-
-Tel: (310) 391-9971
-Fax: (310) 391-8971
-Web: www.StatModel.com
-Support: Support@StatModel.com
-
-Copyright (c) 1998-2024 Muthen & Muthen
+# SVALUES 
+
+## MPLUS GAVE ME THIS
+
+orien BY day*0.76066;
+orien BY month*1.31844;
+orien BY wkday*0.61196;
+orien BY year*2.03978;
+orien BY country*0.75212;
+orien BY state*0.86510;
+dm BY month@1;
+dm BY day@1;
+sc BY state@1;
+sc BY country@1;
+
+dm WITH orien@0;
+dm WITH sc@0;
+sc WITH orien@0;
+
+[ day$1*-0.54089 ];
+[ month$1*-2.22037 ];
+[ year$1*-1.43365 ];
+[ wkday$1*-1.87993 ];
+[ country$1*-0.69425 ];
+[ state$1*-1.54300 ];
+
+orien@1;
+dm*0.37808;
+sc*0.97518;
+
+## USED THE FOLLOWING IN THE CODE TO SAVE SCORES
+
+orien BY day*0.76066
+month*1.31844
+wkday*0.61196
+year*2.03978
+country*0.75212
+state*0.86510;
+
+dm BY month@1
+day@1;
+
+sc BY state@1
+country@1;
+
+dm WITH orien@0;
+dm WITH sc@0;
+sc WITH orien@0;
+
+[day$1*-0.54089];
+[month$1*-2.22037];
+[year$1*-1.43365];
+[wkday$1*-1.87993];
+[country$1*-0.69425];
+[state$1*-1.54300];
+
+orien@1;
+dm*0.37808;
+sc*0.97518;
