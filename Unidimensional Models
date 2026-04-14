@@ -1,0 +1,511 @@
+# packages
+
+library(MplusAutomation)
+library(here)
+library(labelled)
+library(haven)
+library(reshape2)
+library(dplyr)
+library(purrr)
+library(tibble)
+library(tidyr)
+library(ggplot2)
+library(lspline)
+
+
+#OVERALL SAMPLE - FINAL MODELS ----
+
+data <- read.table(
+  "C:/Users/lk2681.MC/R Files/mexcog2016_forcfa_040726_USE.dat",
+  header = FALSE,
+  na.strings = "-999"
+)
+
+colnames(data) <- c("id", "age", "sex", "locality", "yrschool",
+                    "cogtype", "animals", "day", "month", "year",
+                    "wkday", "time", "where", "store", "country",
+                    "state", "mmseimm", "ceradimm", "braveimm",
+                    "lmimm", "mmsedel", "ceraddel", "bravedel",
+                    "lmdelay", "ceradrec", "figdel", "visscan",
+                    "bkwdcnt", "thrstep", "reading", "writing",
+                    "twostep", "shoe", "pencil", "elbow", "bridge",
+                    "hammer", "scissors", "mmserep", "onefig",
+                    "fourfig", "serthr", "sersev", "symdig",
+                    "similar", "gonogo", "urbrur")
+
+summary(data)
+ncol(data)     # should be 47
+colnames(data) # confirm order
+
+##orientation ----
+
+orientation_data <- data %>%
+  dplyr::select(
+    id,
+    day,
+    month,
+    year,
+    wkday,
+    country,
+    state
+  ) %>%
+  dplyr::mutate(dplyr::across(c(day, month, year, wkday, country, state), as.numeric)) %>%
+  labelled::remove_labels() %>%
+  labelled::remove_attributes("display_width")
+
+orientation_model <- mplusObject(
+  
+  MODEL = "
+orien BY
+day
+month
+year
+wkday
+country
+state;
+",
+  
+  usevariables = colnames(orientation_data),
+  
+  VARIABLE = "
+IDVARIABLE = id;
+MISSING ARE ALL (-999);
+CATEGORICAL = day month year wkday country state;
+",
+  
+  ANALYSIS = "
+ESTIMATOR = WLSMV;
+",
+  
+  OUTPUT = "
+SAMPSTAT
+STANDARDIZED
+MODINDICES(3.84);
+",
+  
+  rdata = orientation_data
+)
+
+orientation_final <- mplusModeler(
+  orientation_model,
+  modelout = "orientation_final.inp",
+  run = TRUE
+)
+
+orientation_final <- readModels("orientation_final.out")
+orientation_final
+
+orientation_final$output
+
+
+##memory ----
+
+memory_data <- data %>% 
+  dplyr::select(
+    id,
+    mmseimm, 
+    ceradimm,
+    braveimm,
+    lmimm,
+    mmsedel,
+    ceraddel,
+    bravedel,
+    lmdelay,
+    ceradrec,
+    figdel
+  ) %>%
+  dplyr::mutate(dplyr::across(
+    c(ceradimm,
+      braveimm,
+      lmimm,ceraddel,
+      bravedel,
+      lmdelay,
+      ceradrec,
+      figdel), as.numeric
+  )) %>%
+  labelled::remove_labels() %>%
+  labelled::remove_attributes("display_width")
+
+mem_final_model <- mplusObject(
+  
+  MODEL = "
+memory BY
+mmseimm
+mmsedel
+ceradimm
+ceraddel
+ceradrec
+braveimm
+bravedel
+lmimm
+lmdelay
+figdel;
+mmseimm WITH mmsedel;
+ceradimm WITH ceraddel;
+ceradimm WITH ceradrec;
+ceraddel WITH ceradrec;
+braveimm WITH bravedel;
+lmimm WITH lmdelay;
+",
+  
+  usevariables = colnames(memory_data),
+  
+  VARIABLE = "
+IDVARIABLE = id;
+MISSING ARE ALL (-999);
+CATEGORICAL = mmseimm mmsedel;
+",
+  
+  ANALYSIS = "
+ESTIMATOR = WLSMV;
+PARAMETERIZATION = THETA;
+",
+  
+  OUTPUT = "
+SAMPSTAT
+STANDARDIZED
+MODINDICES(3.84);
+",
+  
+  rdata = memory_data
+)
+
+mem_final <- mplusModeler(
+  mem_final_model,
+  modelout = "mem_final.inp",
+  run = TRUE
+)
+
+mem_final <- readModels("mem_final.out")
+mem_final
+
+mem_final$output
+
+
+##language ----
+
+language_data <- data %>%
+  dplyr::select(
+    id,
+    animals,
+    shoe,
+    pencil,
+    elbow,
+    bridge,
+    hammer,
+    scissors,
+    mmserep,
+    reading,
+    writing,
+    twostep,
+    thrstep
+  ) %>%
+  dplyr::mutate(dplyr::across(
+    c(shoe, pencil, elbow, bridge, hammer, scissors,
+      mmserep, reading, writing, twostep, thrstep), as.numeric
+  )) %>%
+  labelled::remove_labels() %>%
+  labelled::remove_attributes("display_width")
+
+language_model <- mplusObject(
+  
+  MODEL = "
+lang BY animals shoe pencil scissors
+         bridge hammer mmserep reading writing
+         twostep thrstep;
+
+pencil WITH shoe;
+hammer WITH bridge;
+",
+  
+  usevariables = colnames(language_data),
+  
+  VARIABLE = "
+IDVARIABLE = id;
+MISSING ARE ALL (-999);
+
+USEVARIABLES ARE animals shoe pencil bridge
+                 hammer scissors mmserep reading writing
+                 twostep thrstep;
+
+CATEGORICAL = shoe pencil bridge hammer scissors
+              mmserep reading writing twostep thrstep;
+",
+  
+  ANALYSIS = "
+ESTIMATOR = WLSMV;
+PARAMETERIZATION = THETA;
+",
+  
+  OUTPUT = "
+SAMPSTAT
+STANDARDIZED
+MODINDICES(3.84)
+TECH4;
+",
+  
+  rdata = language_data
+)
+
+language_final <- mplusModeler(
+  language_model,
+  modelout = "language_final.inp",
+  run = TRUE
+)
+
+language_final <- readModels("language_final.out")
+language_final
+language_final$output
+
+
+##executive functioning ----
+
+execfunc_data <- data %>%
+  dplyr::select(
+    id,
+    visscan,
+    bkwdcnt,
+    symdig,
+    similar,
+    gonogo, 
+    serthr
+  ) %>%
+  labelled::remove_labels() %>%
+  labelled::remove_attributes("display_width")
+
+execfunc_model <- mplusObject(
+  
+  MODEL = "
+execfunc BY visscan bkwdcnt symdig similar gonogo serthr;
+visscan WITH symdig;
+serthr WITH bkwdcnt;
+",
+  
+  usevariables = colnames(execfunc_data),
+  
+  VARIABLE = "
+IDVARIABLE = id;
+MISSING ARE ALL (-999);
+CATEGORICAL = similar serthr;
+",
+  
+  ANALYSIS = "
+ESTIMATOR = WLSMV;
+PARAMETERIZATION = THETA;
+",
+  
+  OUTPUT = "
+SAMPSTAT
+STANDARDIZED
+MODINDICES(3.84)
+TECH4;
+",
+  
+  rdata = execfunc_data
+)
+
+execfunc_final <- mplusModeler(
+  execfunc_model,
+  modelout = "execfunc_final.inp",
+  run = TRUE
+)
+
+execfunc_final <- readModels("execfunc_final.out")
+execfunc_final
+execfunc_final$output
+
+
+##visuospatial skills ----
+
+visual_data <- data %>%
+  dplyr::select(
+    id,
+    onefig,
+    fourfig
+  ) %>%
+  dplyr::mutate(dplyr::across(c(onefig), as.numeric)) %>%
+  labelled::remove_labels() %>%
+  labelled::remove_attributes("display_width")
+
+visual_model <- mplusObject(
+  
+  MODEL = "
+visual BY fourfig* (1);
+visual BY onefig (1);
+visual@1;
+",
+  
+  usevariables = colnames(visual_data),
+  
+  VARIABLE = "
+IDVARIABLE = id;
+MISSING ARE ALL (-999);
+CATEGORICAL = onefig;
+",
+  
+  ANALYSIS = "
+ESTIMATOR = WLSMV;
+PARAMETERIZATION = THETA;
+",
+  
+  OUTPUT = "
+SAMPSTAT
+STANDARDIZED
+MODINDICES(3.84);
+",
+  
+  rdata = visual_data
+)
+
+visual_final <- mplusModeler(
+  visual_model,
+  modelout = "visual_final.inp",
+  run = TRUE
+)
+
+visual_final <- readModels("visual_final.out")
+visual_final
+
+visual_final$output
+
+
+
+##2nd order model GCP ----
+
+gcp_data <- data %>%
+  dplyr::select(
+    id,
+    day, month, year, wkday, country, state,
+    mmseimm, ceradimm, braveimm, lmimm, mmsedel, ceraddel, bravedel, lmdelay, ceradrec, figdel,
+    animals, shoe, pencil, bridge, hammer, scissors, mmserep, reading, writing, twostep, thrstep,
+    visscan, bkwdcnt, symdig, similar, gonogo, serthr, onefig, fourfig
+  ) %>%
+  dplyr::mutate(dplyr::across(
+    c(day, month, year, wkday, country, state,
+      mmseimm, mmsedel,
+      shoe, pencil, bridge, hammer, scissors,
+      mmserep, reading, writing, twostep, thrstep,
+      onefig), as.numeric
+  )) %>%
+  labelled::remove_labels() %>%
+  labelled::remove_attributes("display_width")
+
+gcp_model <- mplusObject(
+  
+  MODEL = "
+orien BY day month year wkday country state;
+
+memory BY mmseimm ceradimm braveimm lmimm mmsedel ceraddel
+       bravedel lmdelay ceradrec figdel;
+
+lang BY animals shoe pencil scissors bridge hammer mmserep
+      reading writing twostep thrstep;
+
+execfunc BY visscan bkwdcnt symdig similar gonogo serthr;
+
+visual BY fourfig onefig;
+
+gcp BY orien memory lang execfunc visual;
+
+mmseimm WITH mmsedel;
+ceradimm WITH ceraddel;
+ceradimm WITH ceradrec;
+ceraddel WITH ceradrec;
+braveimm WITH bravedel;
+lmimm WITH lmdelay;
+
+pencil WITH shoe;
+hammer WITH bridge;
+
+visscan WITH symdig;
+serthr WITH bkwdcnt;
+
+fourfig WITH figdel;
+symdig WITH reading;
+symdig WITH writing;
+visscan WITH reading;
+visscan WITH reading;
+",
+  
+  usevariables = colnames(gcp_data),
+  
+  VARIABLE = "
+IDVARIABLE = id;
+MISSING ARE ALL (-999);
+
+USEVARIABLES ARE day month year wkday country state
+                 mmseimm ceradimm braveimm lmimm mmsedel
+                 ceraddel bravedel lmdelay ceradrec figdel
+                 animals shoe pencil bridge hammer scissors
+                 mmserep reading writing twostep thrstep
+                 visscan bkwdcnt symdig similar gonogo
+                 serthr onefig fourfig;
+
+CATEGORICAL = day month year wkday country state
+              mmseimm mmsedel
+              shoe pencil bridge hammer scissors
+              mmserep reading writing twostep thrstep
+              serthr onefig similar;
+",
+  
+  ANALYSIS = "
+ESTIMATOR = WLSMV;
+PARAMETERIZATION = THETA;
+",
+  
+  OUTPUT = "
+SAMPSTAT
+STANDARDIZED
+MODINDICES(3.84)
+TECH4;
+",
+  
+  SAVEDATA = "
+FILE IS gcp_scores.dat;
+SAVE = FSCORES;
+",
+  
+  rdata = gcp_data
+)
+
+gcp_final <- mplusModeler(
+  gcp_model,
+  modelout = "gcp_final.inp",
+  run = TRUE
+)
+
+gcp_final <- readModels("gcp_final.out")
+gcp_final
+gcp_final$output
+
+
+
+# view the beginning of the output
+head(gcp_final$output, 100)
+
+gcp_final$output[900:1300]
+
+# increase print limit and view full output
+options(max.print = 10000)
+five_corr_final$output
+
+
+#TO SAVE FACTOR SCORES ----
+
+#SAVING GCP FROM THE CORRELATED MODEL ABOVE ----
+
+gcp_final <- readModels("gcp_final.out")
+
+#show output
+gcp_final$output
+
+gcp_scores <- gcp_final$savedata
+colnames(gcp_scores)
+sd(gcp_scores$GCP, na.rm = TRUE)
+mean(gcp_scores$GCP, na.rm = TRUE)
+
+
+
+
+
+
