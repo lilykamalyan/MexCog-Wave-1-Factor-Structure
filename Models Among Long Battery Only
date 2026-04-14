@@ -434,3 +434,5 @@ gcp_final_long <- mplusModeler(
 
 gcp_final_long <- readModels("gcp_final_long.out")
 gcp_final_long
+
+gcp_final_long$output
