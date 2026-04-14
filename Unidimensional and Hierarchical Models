@@ -480,32 +480,3 @@ gcp_final$output
 
 
 
-# view the beginning of the output
-head(gcp_final$output, 100)
-
-gcp_final$output[900:1300]
-
-# increase print limit and view full output
-options(max.print = 10000)
-five_corr_final$output
-
-
-#TO SAVE FACTOR SCORES ----
-
-#SAVING GCP FROM THE CORRELATED MODEL ABOVE ----
-
-gcp_final <- readModels("gcp_final.out")
-
-#show output
-gcp_final$output
-
-gcp_scores <- gcp_final$savedata
-colnames(gcp_scores)
-sd(gcp_scores$GCP, na.rm = TRUE)
-mean(gcp_scores$GCP, na.rm = TRUE)
-
-
-
-
-
-
