@@ -1,0 +1,450 @@
+#OVERALL SAMPLE - FINAL MODELS - WITH CLUSTER ID ----
+
+data <- read.table(
+  "C:/Users/lk2681.MC/R Files/mexcog2016_forcfa_040726_hhid_USE.dat",
+  header = FALSE,
+  na.strings = "-999"
+)
+
+colnames(data) <- c("id", "hhid", "age", "sex", "locality", "yrschool",
+                    "cogtype", "animals", "day", "month", "year", 
+                    "wkday", "time", "where", "store", "country", 
+                    "state", "mmseimm", "ceradimm", "braveimm", 
+                    "lmimm", "mmsedel", "ceraddel", "bravedel", 
+                    "lmdelay", "ceradrec", "figdel", "visscan",
+                    "bkwdcnt", "thrstep", "reading", "writing", "twostep",
+                    "shoe", "pencil", "elbow", "bridge", "hammer", "scissors",
+                    "mmserep", "onefig", "fourfig", "serthr", "sersev",
+                    "symdig", "similar", "gonogo", "urbrur")
+
+ncol(data)      # should be 48
+colnames(data)  # confirm order
+summary(data)
+
+##orientation ----
+
+orientation_data_hhid <- data %>%
+  dplyr::select(
+    id, hhid,
+    day, month, year, wkday, country, state
+  ) %>%
+  dplyr::mutate(dplyr::across(c(day, month, year, wkday, country, state), as.numeric)) %>%
+  labelled::remove_labels() %>%
+  labelled::remove_attributes("display_width")
+
+orientation_model_hhid <- mplusObject(
+  
+  MODEL = "
+orien BY
+day
+month
+year
+wkday
+country
+state;
+",
+
+  usevariables = colnames(orientation_data_hhid),
+  
+  VARIABLE = "
+IDVARIABLE = id;
+CLUSTER = hhid;
+MISSING ARE ALL (-999);
+CATEGORICAL = day month year wkday country state;
+",
+  
+  ANALYSIS = "
+ESTIMATOR = WLSMV;
+TYPE = COMPLEX;
+",
+  
+  OUTPUT = "
+SAMPSTAT
+STANDARDIZED
+MODINDICES(3.84);
+",
+  
+  rdata = orientation_data_hhid
+)
+
+orientation_final_hhid <- mplusModeler(
+  orientation_model_hhid,
+  modelout = "orientation_final_hhid.inp",
+  run = TRUE
+)
+
+orientation_final_hhid <- readModels("orientation_final_hhid.out")
+orientation_final_hhid
+
+orientation_final_hhid$output
+
+
+##memory ----
+
+memory_data_hhid <- data %>% 
+  dplyr::select(
+    id, hhid,
+    mmseimm, 
+    ceradimm,
+    braveimm,
+    lmimm,
+    mmsedel,
+    ceraddel,
+    bravedel,
+    lmdelay,
+    ceradrec,
+    figdel
+  ) %>%
+  labelled::remove_labels() %>%
+  labelled::remove_attributes("display_width")
+
+mem_final_model_hhid <- mplusObject(
+  
+  MODEL = "
+memory BY
+mmseimm
+mmsedel
+ceradimm
+ceraddel
+ceradrec
+braveimm
+bravedel
+lmimm
+lmdelay
+figdel;
+mmseimm WITH mmsedel;
+ceradimm WITH ceraddel;
+ceradimm WITH ceradrec;
+ceraddel WITH ceradrec;
+braveimm WITH bravedel;
+lmimm WITH lmdelay;
+",
+  
+  usevariables = colnames(memory_data_hhid),
+  
+  VARIABLE = "
+IDVARIABLE = id;
+MISSING ARE ALL (-999);
+CLUSTER = hhid;
+CATEGORICAL = mmseimm mmsedel;
+",
+  
+  ANALYSIS = "
+ESTIMATOR = WLSMV;
+PARAMETERIZATION = THETA;
+TYPE = COMPLEX;
+",
+  
+  OUTPUT = "
+SAMPSTAT
+STANDARDIZED
+MODINDICES(3.84);
+",
+  
+  rdata = memory_data_hhid
+)
+
+mem_final_hhid <- mplusModeler(
+  mem_final_model_hhid,
+  modelout = "mem_final_hhid.inp",
+  run = TRUE
+)
+
+mem_final_hhid <- readModels("mem_final_hhid.out")
+mem_final_hhid
+
+mem_final_hhid$output
+
+
+##language ----
+
+language_data_hhid <- data %>%
+  dplyr::select(
+    id, hhid,
+    animals,
+    shoe,
+    pencil,
+    bridge,
+    hammer,
+    scissors,
+    mmserep,
+    reading,
+    writing,
+    twostep,
+    thrstep
+  ) %>%
+  dplyr::mutate(dplyr::across(c(shoe, pencil, bridge, hammer, scissors,
+                                mmserep, reading, writing), as.numeric)) %>%
+  labelled::remove_labels() %>%
+  labelled::remove_attributes("display_width")
+
+language_model_hhid <- mplusObject(
+  
+  MODEL = "
+lang BY animals shoe pencil scissors
+         bridge hammer mmserep reading writing
+         twostep thrstep;
+
+pencil WITH shoe;
+hammer WITH bridge;
+",
+  
+  
+  usevariables = colnames(language_data_hhid),
+  
+  VARIABLE = "
+IDVARIABLE = id;
+CLUSTER = hhid;
+MISSING ARE ALL (-999);
+
+USEVARIABLES ARE animals shoe pencil bridge
+                 hammer scissors mmserep reading writing
+                 twostep thrstep;
+
+CATEGORICAL = shoe pencil bridge hammer scissors
+              mmserep reading writing twostep thrstep;
+",
+  
+  ANALYSIS = "
+ESTIMATOR = WLSMV;
+TYPE = COMPLEX;
+PARAMETERIZATION = THETA;
+",
+  
+  OUTPUT = "
+SAMPSTAT
+STANDARDIZED
+MODINDICES(3.84);
+",
+  
+  rdata = language_data_hhid
+)
+
+language_final_hhid <- mplusModeler(
+  language_model_hhid,
+  modelout = "language_final_hhid.inp",
+  run = TRUE
+)
+
+language_final_hhid <- readModels("language_final_hhid.out")
+language_final_hhid
+
+
+language_final_hhid$output
+
+
+
+##executive functioning ----
+
+execfunc_data_hhid <- data %>%
+  dplyr::select(
+    id, hhid,
+    visscan, bkwdcnt, symdig, similar, gonogo, serthr
+  ) %>%
+  labelled::remove_labels() %>%
+  labelled::remove_attributes("display_width")
+
+execfunc_model_hhid <- mplusObject(
+  
+  MODEL = "
+execfunc BY visscan bkwdcnt symdig similar gonogo serthr;
+visscan WITH symdig;
+serthr WITH bkwdcnt;
+",
+  
+  usevariables = colnames(execfunc_data_hhid),
+  
+  VARIABLE = "
+IDVARIABLE = id;
+CLUSTER = hhid;
+MISSING ARE ALL (-999);
+CATEGORICAL = similar serthr;
+",
+  
+  ANALYSIS = "
+ESTIMATOR = WLSMV;
+PARAMETERIZATION = THETA;
+TYPE = COMPLEX;
+",
+  
+  OUTPUT = "
+SAMPSTAT
+STANDARDIZED
+MODINDICES(3.84);
+",
+  
+  rdata = execfunc_data_hhid
+)
+
+execfunc_final_hhid <- mplusModeler(
+  execfunc_model_hhid,
+  modelout = "execfunc_final_hhid.inp",
+  run = TRUE
+)
+
+execfunc_final_hhid <- readModels("execfunc_final_hhid.out")
+execfunc_final_hhid
+
+execfunc_final_hhid$output
+
+
+##visuospatial ----
+
+visual_data_hhid <- data %>%
+  dplyr::select(
+    id, hhid,
+    onefig, fourfig
+  ) %>%
+  dplyr::mutate(onefig = as.numeric(onefig)) %>%
+  labelled::remove_labels() %>%
+  labelled::remove_attributes("display_width")
+
+visual_model_hhid <- mplusObject(
+  
+  MODEL = "
+visual BY fourfig* (1);
+visual BY onefig (1);
+visual@1;
+",
+  
+  usevariables = colnames(visual_data_hhid),
+  
+  VARIABLE = "
+IDVARIABLE = id;
+CLUSTER = hhid;
+MISSING ARE ALL (-999);
+CATEGORICAL = onefig;
+",
+  
+  ANALYSIS = "
+ESTIMATOR = WLSMV;
+TYPE = COMPLEX;
+PARAMETERIZATION = THETA;
+",
+  
+  OUTPUT = "
+SAMPSTAT
+STANDARDIZED
+MODINDICES(3.84);
+",
+  
+  rdata = visual_data_hhid
+)
+
+visual_final_hhid <- mplusModeler(
+  visual_model_hhid,
+  modelout = "visual_final_hhid.inp",
+  run = TRUE
+)
+
+visual_final_hhid <- readModels("visual_final_hhid.out")
+visual_final_hhid
+
+visual_final_hhid$output
+
+
+##2nd order model GCP ----
+
+gcp_data_hhid <- data %>%
+  dplyr::select(
+    id, hhid,
+    day, month, year, wkday, country, state,
+    mmseimm, ceradimm, braveimm, lmimm, mmsedel, 
+    ceraddel, bravedel, lmdelay, ceradrec, figdel,
+    animals, shoe, pencil, bridge, hammer, 
+    scissors, mmserep, reading, writing, twostep, 
+    thrstep, visscan, bkwdcnt, symdig, similar, 
+    gonogo, serthr, onefig, fourfig
+  ) %>%
+  dplyr::mutate(dplyr::across(
+    c(day, month, year, wkday, country, state,
+      mmseimm, mmsedel,
+      shoe, pencil, bridge, hammer, scissors,
+      mmserep, reading, writing, twostep, thrstep,
+      onefig), as.numeric
+  )) %>%
+  labelled::remove_labels() %>%
+  labelled::remove_attributes("display_width")
+
+
+gcp_model_hhid <- mplusObject(
+  
+  MODEL = "
+orien BY day month year wkday country state;
+
+memory BY mmseimm ceradimm braveimm lmimm mmsedel ceraddel
+       bravedel lmdelay ceradrec figdel;
+
+lang BY animals shoe pencil scissors bridge hammer mmserep
+      reading writing twostep thrstep;
+
+execfunc BY visscan bkwdcnt symdig similar gonogo serthr;
+
+visual BY fourfig onefig;
+
+gcp BY orien memory lang execfunc visual;
+
+mmseimm WITH mmsedel;
+ceradimm WITH ceraddel;
+ceradimm WITH ceradrec;
+ceraddel WITH ceradrec;
+braveimm WITH bravedel;
+lmimm WITH lmdelay;
+
+pencil WITH shoe;
+hammer WITH bridge;
+
+visscan WITH symdig;
+serthr WITH bkwdcnt;
+
+fourfig WITH figdel;
+symdig WITH reading;
+symdig WITH writing;
+visscan WITH reading;
+visscan WITH reading;
+",
+  
+  usevariables = colnames(gcp_data_hhid),
+  
+  VARIABLE = "
+IDVARIABLE = id;
+CLUSTER = hhid;
+MISSING ARE ALL (-999);
+CATEGORICAL = day month year wkday country state
+              mmseimm mmsedel
+              shoe pencil bridge hammer scissors
+              mmserep reading writing twostep thrstep
+              serthr onefig similar;
+",
+  
+  ANALYSIS = "
+ESTIMATOR = WLSMV;
+TYPE = COMPLEX;
+PARAMETERIZATION = THETA;
+",
+  
+  OUTPUT = "
+SAMPSTAT
+STANDARDIZED
+MODINDICES(3.84);
+",
+  
+  SAVEDATA = "
+FILE IS gcp_scores_hhid.dat;
+SAVE = FSCORES;
+",
+  
+  rdata = gcp_data_hhid
+)
+
+gcp_final_hhid <- mplusModeler(
+  gcp_model_hhid,
+  modelout = "gcp_final_hhid.inp",
+  run = TRUE
+)
+
+gcp_final_hhid
+
+gcp_final_hhid <- readModels("gcp_final_hhid.out")
+
+gcp_final_hhid$output[900:1300]
