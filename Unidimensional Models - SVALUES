@@ -1,0 +1,798 @@
+#BIFACTOR ASK FOR SVALUES ----
+
+##orientation ----
+
+orientation_data <- data %>%
+  dplyr::select(
+    id,
+    day,
+    month,
+    year,
+    wkday,
+    country,
+    state
+  ) %>%
+  dplyr::mutate(dplyr::across(c(day, month, year, wkday, country, state), as.numeric)) %>%
+  labelled::remove_labels() %>%
+  labelled::remove_attributes("display_width")
+
+orientation_svalues_model <- mplusObject(
+  
+  MODEL = "
+orien BY day* month wkday year country state;
+orien@1;
+dm BY month@1;
+dm BY day@1;
+dm WITH orien@0;
+sc BY state@1;
+sc BY country@1;
+sc WITH orien@0;
+sc WITH dm@0;
+",
+  
+  usevariables = colnames(orientation_data),
+  
+  VARIABLE = "
+IDVARIABLE = id;
+MISSING ARE ALL (-999);
+CATEGORICAL = day month wkday year country state;
+",
+  
+  ANALYSIS = "
+ESTIMATOR = MLR;
+LINK = PROBIT;
+",
+  
+  OUTPUT = "
+SAMPSTAT
+STANDARDIZED
+MODINDICES(3.84)
+SVALUES;
+",
+  
+  rdata = orientation_data
+)
+
+orientation_svalues <- mplusModeler(
+  orientation_svalues_model,
+  modelout = "orientation_svalues.inp",
+  run = TRUE
+)
+
+orientation_svalues <- readModels("orientation_svalues.out")
+
+#show output
+orientation_svalues$output
+
+# view svalues
+output_lines <- orientation_svalues$output
+svalues_start <- grep("STARTING VALUES", output_lines)
+output_lines[svalues_start:length(output_lines)]
+
+
+##memory ----
+
+memory_svalues_model <- mplusObject(
+  
+  MODEL = "
+memory BY braveimm* bravedel
+            ceradimm ceraddel ceradrec lmimm lmdelay 
+            mmseimm mmsedel figdel;
+            memory@1;
+
+            bv BY braveimm@1;
+            bv BY bravedel@1;
+            bv WITH memory@0;
+
+            cr BY ceradimm@1;
+            cr BY ceraddel@1;
+            cr BY ceradrec@1;
+            cr WITH memory@0;
+
+            lm BY lmimm@1;
+            lm BY lmdelay@1;
+            lm WITH memory@0;
+
+            mm BY mmseimm@1;
+            mm BY mmsedel@1;
+            mm WITH memory@0;
+
+            bv WITH cr@0;
+            bv WITH lm@0;
+            bv WITH mm@0;
+            cr WITH lm@0;
+            cr WITH mm@0;
+            lm WITH mm@0;
+",
+  
+  usevariables = colnames(memory_data),
+  
+  VARIABLE = "
+IDVARIABLE = id;
+MISSING ARE ALL (-999);
+CATEGORICAL = mmseimm mmsedel;
+",
+  
+  ANALYSIS = "
+ESTIMATOR = WLSMV;
+PARAMETERIZATION = THETA;
+",
+  
+  OUTPUT = "
+SAMPSTAT
+STANDARDIZED
+MODINDICES(3.84)
+SVALUES;
+",
+  
+  rdata = memory_data
+)
+
+memory_svalues <- mplusModeler(
+  memory_svalues_model,
+  modelout = "memory_svalues.inp",
+  run = TRUE
+)
+
+memory_svalues <- readModels("memory_svalues.out")
+
+# view svalues
+output_lines <- memory_svalues$output
+svalues_start <- grep("STARTING VALUES", output_lines)
+output_lines[svalues_start:length(output_lines)]
+
+
+
+
+##language ----
+
+language_data_2 <- data %>% #without elbow
+  dplyr::select(
+    id,
+    animals,
+    shoe,
+    pencil,
+    bridge,
+    hammer,
+    scissors,
+    mmserep,
+    reading,
+    writing,
+    twostep,
+    thrstep
+  ) %>%
+  dplyr::mutate(dplyr::across(
+    c(shoe, pencil, bridge, hammer, scissors,
+      mmserep, reading, writing, twostep, thrstep),
+    as.numeric
+  )) %>%
+  labelled::remove_labels() %>%
+  labelled::remove_attributes("display_width")
+
+
+language_svalues_model <- mplusObject(
+  
+  MODEL = "
+lang BY animals* shoe pencil scissors
+     bridge hammer mmserep reading writing 
+     twostep thrstep;
+lang@1;
+
+ps BY pencil@1;
+ps BY shoe@1;
+ps WITH lang@0;
+
+hb BY hammer@1;
+hb BY bridge@1;
+hb WITH lang@0;
+
+ps WITH hb@0;
+",
+  
+  usevariables = colnames(language_data_2),
+  
+  VARIABLE = "
+IDVARIABLE = id;
+MISSING ARE ALL (-999);
+CATEGORICAL = shoe pencil bridge hammer scissors 
+mmserep reading writing twostep thrstep;
+",
+  
+  ANALYSIS = "
+ESTIMATOR = MLR;
+LINK = PROBIT;
+",
+  
+  OUTPUT = "
+SAMPSTAT
+STANDARDIZED
+MODINDICES(3.84)
+TECH4
+SVALUES;
+",
+  
+  rdata = language_data_2
+)
+
+language_svalues <- mplusModeler(
+  language_svalues_model,
+  modelout = "language_svalues.inp",
+  run = TRUE
+)
+
+language_svalues <- readModels("language_svalues.out")
+
+# extract SVALUES section
+output_lines <- language_svalues$output
+svalues_start <- grep("STARTING VALUES", output_lines)
+output_lines[svalues_start:length(output_lines)]
+
+
+##executive functioning ----
+execfunc_data <- data %>%
+  dplyr::select(
+    id,
+    visscan,
+    bkwdcnt,
+    symdig,
+    similar,
+    gonogo,
+    serthr
+  ) %>%
+  dplyr::mutate(dplyr::across(c(similar, serthr), as.numeric)) %>%
+  labelled::remove_labels() %>%
+  labelled::remove_attributes("display_width")
+
+execfunc_svalues_model <- mplusObject(
+  
+  MODEL = "
+execfunc BY gonogo* visscan symdig bkwdcnt similar serthr;
+execfunc@1;
+
+sv BY symdig@1;
+sv BY visscan@1;
+sv WITH execfunc@0;
+
+bs BY bkwdcnt@1;
+bs BY serthr@1;
+bs WITH execfunc@0;
+",
+  
+  usevariables = colnames(execfunc_data),
+  
+  VARIABLE = "
+IDVARIABLE = id;
+MISSING ARE ALL (-999);
+CATEGORICAL = similar serthr;
+",
+  
+  ANALYSIS = "
+ESTIMATOR = WLSMV;
+PARAMETERIZATION = THETA;
+",
+  
+  OUTPUT = "
+SAMPSTAT
+STANDARDIZED
+MODINDICES(3.84)
+TECH4
+SVALUES;
+",
+  
+  rdata = execfunc_data
+)
+
+execfunc_svalues <- mplusModeler(
+  execfunc_svalues_model,
+  modelout = "execfunc_svalues.inp",
+  run = TRUE
+)
+
+execfunc_svalues <- readModels("execfunc_svalues.out")
+
+# view svalues
+output_lines <- execfunc_svalues$output
+svalues_start <- grep("STARTING VALUES", output_lines)
+output_lines[svalues_start:length(output_lines)]
+
+
+##visuospatial skills ----
+
+visual_data <- data %>%
+  dplyr::select(
+    id,
+    onefig,
+    fourfig
+  ) %>%
+  dplyr::mutate(onefig = as.numeric(onefig)) %>%
+  labelled::remove_labels() %>%
+  labelled::remove_attributes("display_width")
+
+visual_svalues_model <- mplusObject(
+  
+  MODEL = "
+visual BY fourfig* (1);
+visual BY onefig (1);
+visual@1;
+",
+  
+  usevariables = colnames(visual_data),
+  
+  VARIABLE = "
+IDVARIABLE = id;
+MISSING ARE ALL (-999);
+CATEGORICAL = onefig;
+",
+  
+  ANALYSIS = "
+ESTIMATOR = WLSMV;
+PARAMETERIZATION = THETA;
+",
+  
+  OUTPUT = "
+SAMPSTAT
+STANDARDIZED
+MODINDICES(3.84)
+SVALUES;
+",
+  
+  rdata = visual_data
+)
+
+visual_svalues <- mplusModeler(
+  visual_svalues_model,
+  modelout = "visual_svalues.inp",
+  run = TRUE
+)
+
+visual_svalues <- readModels("visual_svalues.out")
+
+# view svalues
+output_lines <- visual_svalues$output
+svalues_start <- grep("STARTING VALUES", output_lines)
+output_lines[svalues_start:length(output_lines)]
+
+
+
+
+#BIFACTOR USE SVALUES ----
+#free parameters were change to fixed values * --> @
+#factor scores saved
+
+##orientation ----
+
+orientation_scores_model <- mplusObject(
+  
+  MODEL = "
+orien BY day*0.76066
+month*1.31844
+wkday*0.61196
+year*2.03978
+country*0.75212
+state*0.86510;
+
+dm BY month@1
+day@1;
+
+sc BY state@1
+country@1;
+
+dm WITH orien@0;
+dm WITH sc@0;
+sc WITH orien@0;
+
+[day$1*-0.54089];
+[month$1*-2.22037];
+[year$1*-1.43365];
+[wkday$1*-1.87993];
+[country$1*-0.69425];
+[state$1*-1.54300];
+
+orien@1;
+dm*0.37808;
+sc*0.97518; 
+",
+  
+  usevariables = colnames(orientation_data),
+  
+  VARIABLE = "
+IDVARIABLE = id;
+MISSING ARE ALL (-999);
+CATEGORICAL = day month year wkday country state;
+",
+  
+  ANALYSIS = "
+ESTIMATOR = MLR;
+LINK = PROBIT;
+",
+  
+  OUTPUT = "
+SAMPSTAT
+STANDARDIZED
+MODINDICES(3.84)
+TECH4
+SVALUES;
+",
+  
+  SAVEDATA = "
+FILE IS orien_scores.dat;
+SAVE = FSCORES;
+FORMAT = FREE;
+",
+  
+  rdata = orientation_data
+)
+
+orientation_scores <- mplusModeler(
+  orientation_scores_model,
+  modelout = "orientation_scores.inp",
+  run = TRUE
+)
+
+orientation_scores <- readModels("orientation_scores.out")
+
+# show output
+orientation_scores$output
+
+scores <- orientation_scores$savedata
+sd(scores$ORIEN, na.rm = TRUE)
+mean(scores$ORIEN, na.rm = TRUE)
+
+
+##memory ----
+memory_scores_model <- mplusObject(
+  
+  MODEL = "
+memory BY braveimm*0.77656
+bravedel*0.74349
+ceradimm*3.53397
+ceraddel*1.64591
+ceradrec*1.90758
+lmimm*2.67799
+lmdelay*2.37619
+mmseimm*0.77588
+mmsedel*0.62166
+figdel*1.86877;
+
+bv BY braveimm@1
+bravedel@1;
+cr BY ceradimm@1
+ceraddel@1
+ceradrec@1;
+lm BY lmimm@1
+lmdelay@1;
+mm BY mmseimm@1
+mmsedel@1;
+
+bv WITH memory@0
+cr@0
+lm@0
+mm@0;
+cr WITH memory@0
+lm@0
+mm@0;
+lm WITH memory@0
+mm@0;
+mm WITH memory@0;
+
+[ceradimm*12.60809];
+[braveimm*2.01091];
+[lmimm*4.87058];
+[ceraddel*3.16966];
+[bravedel*1.43809];
+[lmdelay*3.16387];
+[ceradrec*16.58516];
+[figdel*5.50116];
+[mmseimm$1*-3.66851];
+[mmseimm$2*-2.93672];
+[mmseimm$3*-1.91801];
+[mmsedel$1*-1.64468];
+[mmsedel$2*-0.85039];
+[mmsedel$3*0.28088];
+
+ceradimm*7.93056;
+braveimm*0.80322;
+lmimm*2.98435;
+ceraddel*1.80438;
+bravedel*0.54631;
+lmdelay*2.28894;
+ceradrec*5.60776;
+figdel*7.52422;
+memory@1;
+bv*1.25942;
+cr*1.14889;
+lm*3.52189;
+mm*0.24242;
+",
+  
+  usevariables = colnames(memory_data),
+  
+  VARIABLE = "
+IDVARIABLE = id;
+MISSING ARE ALL (-999);
+CATEGORICAL = mmseimm mmsedel;
+",
+  
+  ANALYSIS = "
+ESTIMATOR = WLSMV;
+PARAMETERIZATION = THETA;
+",
+  
+  OUTPUT = "
+SAMPSTAT
+STANDARDIZED
+MODINDICES(3.84)
+TECH4;
+",
+  
+  SAVEDATA = "
+FILE IS memory_scores.dat;
+SAVE = FSCORES;
+FORMAT = FREE;
+",
+  
+  rdata = memory_data
+)
+
+memory_scores <- mplusModeler(
+  memory_scores_model,
+  modelout = "memory_scores.inp",
+  run = TRUE
+)
+
+memory_scores <- readModels("memory_scores.out")
+
+#show output
+memory_scores$output
+
+scores <- memory_scores$savedata
+sd(scores$MEMORY, na.rm = TRUE)
+mean(scores$MEMORY, na.rm = TRUE)
+
+
+
+##language ----
+language_scores_model <- mplusObject(
+  
+  MODEL = "
+lang BY animals*3.52647;
+lang BY shoe*0.75932;
+lang BY pencil*0.86405;
+lang BY scissors*0.68058;
+lang BY bridge*0.74413;
+lang BY hammer*0.83891;
+lang BY mmserep*0.92389;
+lang BY reading*1.28788;
+lang BY writing*0.77914;
+lang BY twostep*1.02995;
+lang BY thrstep*0.58472;
+
+ps BY pencil@1;
+ps BY shoe@1;
+hb BY hammer@1;
+hb BY bridge@1;
+
+ps WITH lang@0;
+ps WITH hb@0;
+hb WITH lang@0;
+
+[animals*15.06262];
+
+[shoe$1*-3.54315];
+[pencil$1*-3.12432];
+[bridge$1*-1.13316];
+[hammer$1*-2.71607];
+[scissors$1*-2.71207];
+[mmserep$1*-1.75679];
+[reading$1*-1.63235];
+[writing$1*-1.25035];
+[twostep$1*-2.71126];
+[twostep$2*-2.27967];
+[thrstep$1*-2.17798];
+[thrstep$2*-1.38235];
+[thrstep$3*-0.35586];
+
+animals*17.35888;
+lang@1;
+ps*1.12064;
+hb*0.44886;
+",
+  
+  usevariables = colnames(language_data_2),
+  
+  VARIABLE = "
+IDVARIABLE = id;
+MISSING ARE ALL (-999);
+CATEGORICAL = shoe pencil bridge hammer scissors 
+mmserep reading writing twostep thrstep;
+",
+  
+  ANALYSIS = "
+ESTIMATOR = MLR;
+LINK = PROBIT;
+",
+  
+  OUTPUT = "
+SAMPSTAT
+STANDARDIZED
+MODINDICES(3.84)
+TECH4
+SVALUES;
+",
+  
+  SAVEDATA = "
+FILE IS lang_scores.dat;
+SAVE = FSCORES;
+FORMAT = FREE;
+",
+  
+  rdata = language_data_2
+)
+
+language_scores <- mplusModeler(
+  language_scores_model,
+  modelout = "language_scores.inp",
+  run = TRUE
+)
+
+language_scores <- readModels("language_scores.out")
+
+# show output
+language_scores$output
+
+scores_lang <- language_scores$savedata
+sd(scores_lang$LANG, na.rm = TRUE)
+mean(scores_lang$LANG, na.rm = TRUE)
+
+
+
+##executive functioning ----
+execfunc_scores_model <- mplusObject(
+  
+  MODEL = "
+execfunc BY gonogo*1.30520;
+execfunc BY visscan*12.37671;
+execfunc BY symdig*11.19512;
+execfunc BY bkwdcnt*1.13977;
+execfunc BY similar*0.71795;
+execfunc BY serthr*0.71262;
+
+sv BY symdig@1;
+sv BY visscan@1;
+
+bs BY bkwdcnt@1;
+bs BY serthr@1;
+
+sv WITH execfunc@0;
+bs WITH execfunc@0;
+bs WITH sv*-1.34561;
+
+[ visscan*27.12004 ];
+[ bkwdcnt*3.88489 ];
+[ symdig*21.18834 ];
+[ gonogo*8.09931 ];
+
+[ similar$1*-0.62297 ];
+[ similar$2*0.82377 ];
+[ similar$3*2.33030 ];
+
+[ serthr$1*-2.20248 ];
+[ serthr$2*-1.49467 ];
+[ serthr$3*-1.10004 ];
+[ serthr$4*-0.56286 ];
+[ serthr$5*0.46089 ];
+
+visscan*72.24646;
+bkwdcnt*1.52751;
+symdig*26.83351;
+gonogo*3.30785;
+
+execfunc@1;
+sv*25.14556;
+bs*0.33511;
+  ",
+  
+  usevariables = colnames(execfunc_data),
+  
+  VARIABLE = "
+IDVARIABLE = id;
+MISSING ARE ALL (-999);
+CATEGORICAL = similar serthr;
+",
+  
+  ANALYSIS = "
+ESTIMATOR = WLSMV;
+PARAMETERIZATION = THETA;
+",
+  
+  OUTPUT = "
+SAMPSTAT
+STANDARDIZED
+MODINDICES(3.84)
+TECH4
+SVALUES;
+",
+  
+  SAVEDATA = "
+FILE IS execfunc_scores.dat;
+SAVE = FSCORES;
+FORMAT = FREE;
+",
+  
+  rdata = execfunc_data
+)
+
+execfunc_scores <- mplusModeler(
+  execfunc_scores_model,
+  modelout = "execfunc_scores.inp",
+  run = TRUE
+)
+
+execfunc_scores <- readModels("execfunc_scores.out")
+
+# show output
+execfunc_scores$output
+
+# extract factor scores
+scores_execfunc <- execfunc_scores$savedata
+sd(scores_execfunc$EXECFUNC, na.rm = TRUE)
+mean(scores_execfunc$EXECFUNC, na.rm = TRUE)
+
+
+##visuospatial skills ----
+
+visual_scores_model <- mplusObject(
+  
+  MODEL = "
+visual BY fourfig@1.84639 (3);
+visual BY onefig@1.84639 (3);
+
+[ fourfig@8.10789 ];
+
+[ onefig$1@-0.14657 ];
+
+fourfig@2.67885;
+visual@1;
+",
+  
+  usevariables = colnames(visual_data),
+  
+  VARIABLE = "
+IDVARIABLE = id;
+MISSING ARE ALL (-999);
+CATEGORICAL = onefig;
+",
+  
+  ANALYSIS = "
+ESTIMATOR = WLSMV;
+PARAMETERIZATION = THETA;
+",
+  
+  OUTPUT = "
+SAMPSTAT
+STANDARDIZED;
+",
+  
+  SAVEDATA = "
+FILE IS visual_scores.dat;
+SAVE = FSCORES;
+",
+  
+  rdata = visual_data
+)
+
+visual_scores <- mplusModeler(
+  visual_scores_model,
+  modelout = "visual_scores.inp",
+  run = TRUE
+)
+
+visual_scores <- readModels("visual_scores.out")
+
+#show output
+visual_scores$output
+
+scores_visual <- visual_scores$savedata
+sd(scores_visual$VISUAL, na.rm = TRUE)
+mean(scores_visual$VISUAL, na.rm = TRUE)
+
