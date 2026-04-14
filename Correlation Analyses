@@ -1,0 +1,753 @@
+#CORRELATIONS ----
+
+# in-person
+data <- read.table(
+  "C:/Users/lk2681.MC/R Files/mexcog2016_postcfa_resub_040726.dat",
+  header = TRUE,
+  na.strings = "-999"
+)
+
+summary(data)
+
+##within factor scores ----
+
+# your variables
+vars <- c("ORIEN", "MEMORY", "LANG", "EXECFUNC", "VISUAL", "GCP")
+
+# make combinations
+combos <- t(combn(vars, 2))   # each row: c(var1, var2)
+
+# function to compute cor + CI for a pair
+cor_pair <- function(df, v1, v2, method = "pearson", conf.level = 0.95, digits = 3) {
+  tmp <- df %>% select(all_of(c(v1, v2))) %>% filter(complete.cases(.))
+  n <- nrow(tmp)
+  if (n >= 3) {
+    ct <- tryCatch(
+      cor.test(tmp[[1]], tmp[[2]], method = method, conf.level = conf.level),
+      error = function(e) NULL
+    )
+    if (!is.null(ct)) {
+      r <- as.numeric(ct$estimate)
+      ci <- ct$conf.int
+      p <- ct$p.value
+    } else {
+      r <- NA_real_; ci <- c(NA_real_, NA_real_); p <- NA_real_
+    }
+  } else {
+    r <- NA_real_; ci <- c(NA_real_, NA_real_); p <- NA_real_
+  }
+  tibble(
+    var1 = v1,
+    var2 = v2,
+    r = round(r, digits),
+    lower95 = round(ci[1], digits),
+    upper95 = round(ci[2], digits),
+    p = signif(p, 3),
+    n = n,
+    r_ci = ifelse(is.na(r), NA_character_,
+                  sprintf("%0.*f (%0.*f, %0.*f)", digits, r, digits, ci[1], digits, ci[2]))
+  )
+}
+
+# compute for all pairs and bind into one tibble
+cor_tbl <- purrr::pmap_dfr(
+  list(v1 = combos[,1], v2 = combos[,2]),
+  ~ cor_pair(data, ..1, ..2, method = "pearson", conf.level = 0.95, digits = 3)
+)
+
+# view result
+cor_tbl
+
+
+# histograms of cognitive domains - factor scores ----
+
+## orien_single ----
+
+### basic ----
+
+ggplot(data, aes(x = ORIEN)) +
+  geom_histogram(binwidth = 1, fill = "skyblue", color = "black", alpha = 0.7) +
+  labs(x = "Orientation Factor Score", y = "Frequency") +
+  theme_minimal() +
+  theme(
+    axis.title = element_text(size = 20, color = "black", face = "bold"),   # Axis titles
+    axis.text = element_text(size = 20, color = "black")  # Axis tick labels
+  )
+
+### density plot without annotations ----
+# Compute mean
+mean_val <- mean(data$ORIEN, na.rm = TRUE)
+
+plot_with_n <- function(df, var) {
+  n_val <- sum(!is.na(df[[var]]))
+  paste0("italic(n) == ", n_val)
+}
+
+n_label <- plot_with_n(data, "ORIEN")
+
+hist_orien <- ggplot(data, aes(x = ORIEN)) +
+  geom_density(fill = "gray85", color = "gray30", alpha = 0.6,
+               adjust = 1.5, linewidth = 1.5) +
+  geom_vline(xintercept = mean_val, color = "black",
+             linetype = "dotted", linewidth = 1) +
+  annotate("text", x = Inf, y = Inf,
+           label = n_label,
+           parse = TRUE,
+           hjust = 1.5, vjust = 1.0, size = 10, color = "black") +
+  labs(
+    title = "Orientation",
+    x = "Standardized Score (z)",
+    y = "Density"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(
+      size = 24, face = "bold", hjust = 0.5, color = "black", margin = margin(b = 10)
+    ),
+    axis.title = element_text(size = 18, color = "black", face = "bold"),
+    axis.text = element_text(size = 18, color = "black"),
+    axis.line = element_line(color = "black", linewidth = 0.8)
+  )
+
+hist_orien
+
+
+### density plot with annotations ----
+library(ggplot2)
+library(moments)
+
+# Compute stats
+skew_val <- round(skewness(data$ORIEN, na.rm = TRUE), 2)
+kurt_val <- round(kurtosis(data$ORIEN, na.rm = TRUE), 2)
+mean_val <- round(mean(data$ORIEN, na.rm = TRUE), 2)
+sd_val <- round(sd(data$ORIEN, na.rm = TRUE), 2)
+min_val <- round(min(data$ORIEN, na.rm = TRUE), 2)
+max_val <- round(max(data$ORIEN, na.rm = TRUE), 2)
+
+# Create plot
+hist_orien <- ggplot(data, aes(x = ORIEN)) +
+  geom_density(fill = "gray85", color = "gray30", alpha = 0.6, 
+               adjust = 1.2, linewidth = 1.5) +
+  geom_vline(xintercept = mean_val, color = "black", 
+             linetype = "dotted", linewidth = 1) +
+  annotate("text", x = mean_val, y = Inf,
+           label = paste0("Mean = ", mean_val, " (SD = ", sd_val, ")"),
+           hjust = 1, vjust = 1.8, size = 10, color = "black") +
+  annotate("text", x = min_val, y = Inf, hjust = -0.1, vjust = 4,
+           label = paste0("Skew = ", skew_val,
+                          "\nKurtosis = ", kurt_val, 
+                          "\nRange = [", min_val, ", ", max_val, "]"),
+           size = 10, color = "black") +
+  labs(x = "Orientation Factor Score", y = "Density") +
+  theme_minimal() +
+  theme(
+    axis.title = element_text(size = 20, color = "black", face = "bold"),
+    axis.text = element_text(size = 18, color = "black"),
+    plot.title = element_text(size = 20, face = "bold"), 
+    axis.line = element_line(color = "black", linewidth = 0.8)
+  )
+
+hist_orien
+
+
+
+
+## MEMORY ----
+
+### basic ----
+ggplot(data, aes(x = MEMORY)) +
+  geom_histogram(binwidth = 1, fill = "skyblue", color = "black", alpha = 0.7) +
+  labs(x = "Memory Factor Score", y = "Frequency") +
+  theme_minimal() +
+  theme(
+    axis.title = element_text(size = 20, color = "black", face = "bold"),  
+    axis.text = element_text(size = 20, color = "black")  
+  )
+
+
+### density plot without annotations ----
+# Compute mean
+mean_val <- mean(data$MEMORY, na.rm = TRUE)
+
+# Create simple density plot
+n_mem <- sum(!is.na(data$MEMORY))
+n_label_mem <- paste0("italic(n) == ", n_mem)
+
+hist_mem <- ggplot(data, aes(x = MEMORY)) +
+  geom_density(fill = "gray85", color = "gray30", alpha = 0.6,
+               adjust = 1.5, linewidth = 1.5) +
+  geom_vline(xintercept = mean_val, color = "black",
+             linetype = "dotted", linewidth = 1) +
+  annotate("text", x = Inf, y = Inf,
+           label = n_label_mem,
+           parse = TRUE,
+           hjust = 1.5, vjust = 1.0, size = 10, color = "black") +
+  labs(
+    title = "Memory",
+    x = "Standardized Score (z)",
+    y = "Density"
+  ) +
+  coord_cartesian(clip = "off") +  # prevents clipping at edge
+  theme_minimal() +
+  theme(
+    plot.title = element_text(
+      size = 24, face = "bold", hjust = 0.5, color = "black", margin = margin(b = 10)
+    ),
+    axis.title = element_text(size = 18, color = "black", face = "bold"),
+    axis.text = element_text(size = 18, color = "black"),
+    axis.line = element_line(color = "black", linewidth = 0.8)
+  )
+
+hist_mem
+
+
+### density plot with annotations ----
+
+# Compute stats for MEMORY
+skew_val <- round(skewness(data$MEMORY, na.rm = TRUE), 2)
+kurt_val <- round(kurtosis(data$MEMORY, na.rm = TRUE), 2)
+mean_val <- round(mean(data$MEMORY, na.rm = TRUE), 2)
+sd_val <- round(sd(data$MEMORY, na.rm = TRUE), 2)
+min_val <- round(min(data$MEMORY, na.rm = TRUE), 2)
+max_val <- round(max(data$MEMORY, na.rm = TRUE), 2)
+
+
+hist_memory <- ggplot(data, aes(x = MEMORY)) +
+  geom_density(fill = "gray85", color = "gray30", alpha = 0.6, 
+               adjust = 1.2, linewidth = 1.5) +
+  geom_vline(xintercept = mean_val, color = "black", 
+             linetype = "dotted", linewidth = 1) +
+  annotate("text", x = mean_val, y = Inf,
+           label = paste0("Mean = ", mean_val, " (SD = ", sd_val, ")"),
+           hjust = 0.5, vjust = 1.8, size = 9, color = "black") +
+  annotate("text", x = Inf, y = Inf, hjust = 1.1, vjust = 2.5,
+           label = paste0("Skew = ", skew_val,
+                          "\nKurtosis = ", kurt_val,
+                          "\nRange = [", min_val, ", ", max_val, "]"),
+           size = 10, color = "black") +
+  labs(x = "Memory Factor Score", y = "Density") +
+  theme_minimal() +
+  theme(
+    axis.title = element_text(size = 20, color = "black", face = "bold"),
+    axis.text = element_text(size = 18, color = "black"),
+    plot.title = element_text(size = 20, face = "bold"),
+    axis.line = element_line(color = "black", linewidth = 0.8)  # Correct placement
+  )
+
+hist_memory
+
+
+
+
+
+## LANG ----
+
+### basic ----
+ggplot(data, aes(x = LANG)) +
+  geom_histogram(binwidth = 1, fill = "skyblue", color = "black", alpha = 0.7) +
+  labs(x = "Language Factor Score", y = "Frequency") +
+  theme_minimal() +
+  theme(
+    axis.title = element_text(size = 20, color = "black", face = "bold"),  
+    axis.text = element_text(size = 20, color = "black")  
+  )
+
+### density plot without annotations ----
+# Compute mean
+mean_val <- mean(data$LANG, na.rm = TRUE)
+n_lang <- sum(!is.na(data$LANG))
+n_label_lang <- paste0("italic(n) == ", n_lang)
+
+hist_lang <- ggplot(data, aes(x = LANG)) +
+  geom_density(fill = "gray85", color = "gray30", alpha = 0.6,
+               adjust = 1.5, linewidth = 1.5) +
+  geom_vline(xintercept = mean_val, color = "black",
+             linetype = "dotted", linewidth = 1) +
+  annotate("text", x = Inf, y = Inf,
+           label = n_label_lang,
+           parse = TRUE,
+           hjust = 1.5, vjust = 1.0, size = 10, color = "black") +
+  labs(
+    title = "Language",
+    x = "Standardized Score (z)",
+    y = "Density"
+  ) +
+  coord_cartesian(clip = "off") +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(
+      size = 24, face = "bold", hjust = 0.5, color = "black", margin = margin(b = 10)
+    ),
+    axis.title = element_text(size = 18, color = "black", face = "bold"),
+    axis.text = element_text(size = 18, color = "black"),
+    axis.line = element_line(color = "black", linewidth = 0.8)
+  )
+
+hist_lang
+
+### density plot with annotations ----
+
+# Compute stats
+skew_val <- round(skewness(data$LANG, na.rm = TRUE), 2)
+kurt_val <- round(kurtosis(data$LANG, na.rm = TRUE), 2)
+mean_val <- round(mean(data$LANG, na.rm = TRUE), 2)
+sd_val <- round(sd(data$LANG, na.rm = TRUE), 2)
+min_val <- round(min(data$LANG, na.rm = TRUE), 2)
+max_val <- round(max(data$LANG, na.rm = TRUE), 2)
+
+
+hist_lang <- ggplot(data, aes(x = LANG)) +
+  geom_density(fill = "gray85", color = "gray30", alpha = 0.6, 
+               adjust = 1.2, linewidth = 1.5) +
+  geom_vline(xintercept = mean_val, color = "black", 
+             linetype = "dotted", linewidth = 1) +
+  annotate("text", x = mean_val, y = Inf,
+           label = paste0("Mean = ", mean_val, " (SD = ", sd_val, ")"),
+           hjust = 0.5, vjust = 1.8, size = 9, color = "black") +
+  annotate("text", x = Inf, y = Inf, hjust = 1.1, vjust = 2.5,
+           label = paste0("Skew = ", skew_val,
+                          "\nKurtosis = ", kurt_val,
+                          "\nRange = [", min_val, ", ", max_val, "]"),
+           size = 10, color = "black") +
+  labs(x = "Language Factor Score", y = "Density") +
+  theme_minimal() +
+  theme(
+    axis.title = element_text(size = 20, color = "black", face = "bold"),
+    axis.text = element_text(size = 18, color = "black"),
+    plot.title = element_text(size = 20, face = "bold"),
+    axis.line = element_line(color = "black", linewidth = 0.8)  # Correct placement
+  )
+
+hist_lang
+
+
+
+
+## VISUAL ----
+
+### basic ----
+ggplot(data, aes(x = VISUAL)) +
+  geom_histogram(binwidth = 1, fill = "skyblue", color = "black", alpha = 0.7) +
+  labs(x = "Visuospatial Factor Score", y = "Frequency") +
+  theme_minimal() +
+  theme(
+    axis.title = element_text(size = 20, color = "black", face = "bold"),  
+    axis.text = element_text(size = 20, color = "black")  
+  )
+
+
+### density plot without annotations ----
+# Compute mean
+mean_val <- mean(data$VISUAL, na.rm = TRUE)
+
+# Create simple density plot
+n_vis <- sum(!is.na(data$VISUAL))
+n_label_vis <- paste0("italic(n) == ", n_vis)
+
+hist_vis <- ggplot(data, aes(x = VISUAL)) +
+  geom_density(fill = "gray85", color = "gray30", alpha = 0.6,
+               adjust = 1.5, linewidth = 1.5) +
+  geom_vline(xintercept = mean_val, color = "black",
+             linetype = "dotted", linewidth = 1) +
+  annotate("text", x = Inf, y = Inf,
+           label = n_label_vis,
+           parse = TRUE,
+           hjust = 1.5, vjust = 0.8, size = 10, color = "black") +
+  labs(
+    title = "Visuospatial",
+    x = "Standardized Score (z)",
+    y = "Density"
+  ) +
+  coord_cartesian(clip = "off") +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(
+      size = 24, face = "bold", hjust = 0.5, color = "black", margin = margin(b = 10)
+    ),
+    axis.title = element_text(size = 18, color = "black", face = "bold"),
+    axis.text = element_text(size = 18, color = "black"),
+    axis.line = element_line(color = "black", linewidth = 0.8)
+  )
+
+hist_vis
+
+### density plot with annotations ----
+# Compute stats
+skew_val <- round(skewness(data$VISUAL, na.rm = TRUE), 2)
+kurt_val <- round(kurtosis(data$VISUAL, na.rm = TRUE), 2)
+mean_val <- round(mean(data$VISUAL, na.rm = TRUE), 2)
+sd_val <- round(sd(data$VISUAL, na.rm = TRUE), 2)
+min_val <- round(min(data$VISUAL, na.rm = TRUE), 2)
+max_val <- round(max(data$VISUAL, na.rm = TRUE), 2)
+
+hist_vis <- ggplot(data, aes(x = VISUAL)) +
+  geom_density(fill = "gray85", color = "gray30", alpha = 0.6, 
+               adjust = 1.2, linewidth = 1.5) +
+  geom_vline(xintercept = mean_val, color = "black", 
+             linetype = "dotted", linewidth = 1) +
+  annotate("text", x = mean_val, y = Inf,
+           label = paste0("Mean = ", mean_val, " (SD = ", sd_val, ")"),
+           hjust = 0.5, vjust = 1.8, size = 10, color = "black") +
+  annotate("text", x = min_val, y = Inf, hjust = -0.1, vjust = 4,
+           label = paste0("Skew = ", skew_val,
+                          "\nKurtosis = ", kurt_val,
+                          "\nRange = [", min_val, ", ", max_val, "]"),
+           size = 10, color = "black") +
+  labs(x = "Visuospatial Factor Score", y = "Density") +
+  theme_minimal() +
+  theme(
+    axis.title = element_text(size = 20, color = "black", face = "bold"),
+    axis.text = element_text(size = 18, color = "black"),
+    plot.title = element_text(size = 20, face = "bold"),
+    axis.line = element_line(color = "black", linewidth = 0.8)
+  )
+
+
+hist_vis
+
+
+
+## EXECFUNC ----
+
+## basic ----
+ggplot(data, aes(x = EXECFUNC)) +
+  geom_histogram(binwidth = 1, fill = "skyblue", color = "black", alpha = 0.7) +
+  labs(x = "Executive Function Factor Score", y = "Frequency") +
+  theme_minimal() +
+  theme(
+    axis.title = element_text(size = 20, color = "black", face = "bold"),  
+    axis.text = element_text(size = 20, color = "black")  
+  )
+
+
+### density plot without annotations ----
+# Compute mean
+mean_val <- mean(data$EXECFUNC, na.rm = TRUE)
+
+# Create simple density plot
+n_exfx <- sum(!is.na(data$EXECFUNC))
+n_label_exfx <- paste0("italic(n) == ", n_exfx)
+
+hist_exfx <- ggplot(data, aes(x = EXECFUNC)) +
+  geom_density(fill = "gray85", color = "gray30", alpha = 0.6,
+               adjust = 1.5, linewidth = 1.5) +
+  geom_vline(xintercept = mean_val, color = "black",
+             linetype = "dotted", linewidth = 1) +
+  annotate("text", x = Inf, y = Inf,
+           label = n_label_exfx,
+           parse = TRUE,
+           hjust = 1.5, vjust = 1.0, size = 10, color = "black") +
+  labs(
+    title = "Executive Functioning",
+    x = "Standardized Score (z)",
+    y = "Density"
+  ) +
+  coord_cartesian(clip = "off") +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(
+      size = 24, face = "bold", hjust = 0.5, color = "black", margin = margin(b = 10)
+    ),
+    axis.title = element_text(size = 18, color = "black", face = "bold"),
+    axis.text = element_text(size = 18, color = "black"),
+    axis.line = element_line(color = "black", linewidth = 0.8)
+  )
+
+hist_exfx
+
+### density plot with annotations ----
+
+# Compute stats
+skew_val <- round(skewness(data$EXECFUNC, na.rm = TRUE), 2)
+kurt_val <- round(kurtosis(data$EXECFUNC, na.rm = TRUE), 2)
+mean_val <- round(mean(data$EXECFUNC, na.rm = TRUE), 2)
+sd_val <- round(sd(data$EXECFUNC, na.rm = TRUE), 2)
+min_val <- round(min(data$EXECFUNC, na.rm = TRUE), 2)
+max_val <- round(max(data$EXECFUNC, na.rm = TRUE), 2)
+
+
+hist_exfx <- ggplot(data, aes(x = EXECFUNC)) +
+  geom_density(fill = "gray85", color = "gray30", alpha = 0.6, 
+               adjust = 1.2, linewidth = 1.) +
+  geom_vline(xintercept = mean_val, color = "black", 
+             linetype = "dotted", linewidth = 1) +
+  annotate("text", x = mean_val, y = Inf,
+           label = paste0("Mean = ", mean_val, " (SD = ", sd_val, ")"),
+           hjust = 0.5, vjust = 1.8, size = 9, color = "black") +
+  annotate("text", x = Inf, y = Inf, hjust = 1.1, vjust = 2.5,
+           label = paste0("Skew = ", skew_val,
+                          "\nKurtosis = ", kurt_val,
+                          "\nRange = [", min_val, ", ", max_val, "]"),
+           size = 10, color = "black") +
+  labs(x = "Executive Function Factor Score", y = "Density") +
+  theme_minimal() +
+  theme(
+    axis.title = element_text(size = 20, color = "black", face = "bold"),
+    axis.text = element_text(size = 18, color = "black"),
+    plot.title = element_text(size = 20, face = "bold"),
+    axis.line = element_line(color = "black", linewidth = 0.8)
+  )
+
+hist_exfx
+
+
+
+## GCP ----
+
+### basic ----
+ggplot(data, aes(x = GCP)) +
+  geom_histogram(binwidth = 1, fill = "skyblue", color = "black", alpha = 0.7) +
+  labs(x = "Visuospatial Factor Score", y = "Frequency") +
+  theme_minimal() +
+  theme(
+    axis.title = element_text(size = 20, color = "black", face = "bold"),  
+    axis.text = element_text(size = 20, color = "black")  
+  )
+
+
+
+### density plot without annotations ----
+# Compute mean
+mean_val <- mean(data$GCP, na.rm = TRUE)
+
+# Create simple density plot
+n_gcp <- sum(!is.na(data$GCP))
+n_label_gcp <- paste0("italic(N) == ", n_gcp)
+
+hist_gcp <- ggplot(data, aes(x = GCP)) +
+  geom_density(fill = "gray85", color = "gray30", alpha = 0.6,
+               adjust = 1.5, linewidth = 1.5) +
+  geom_vline(xintercept = mean_val, color = "black",
+             linetype = "dotted", linewidth = 1) +
+  annotate("text", x = Inf, y = Inf,
+           label = n_label_gcp,
+           parse = TRUE,
+           hjust = 1.5, vjust = 1.0, size = 10, color = "black") +
+  labs(
+    title = "General Cognitive Functioning",
+    x = "Standardized Score (z)",
+    y = "Density"
+  ) +
+  coord_cartesian(clip = "off") +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(
+      size = 24, face = "bold", hjust = 0.5, color = "black", margin = margin(b = 10)
+    ),
+    axis.title = element_text(size = 18, color = "black", face = "bold"),
+    axis.text = element_text(size = 18, color = "black"),
+    axis.line = element_line(color = "black", linewidth = 0.8)
+  )
+
+hist_gcp
+
+
+### density plot with annotations ----
+# Compute stats 
+skew_val <- round(skewness(data$GCP, na.rm = TRUE), 2)
+kurt_val <- round(kurtosis(data$GCP, na.rm = TRUE), 2)
+mean_val <- round(mean(data$GCP, na.rm = TRUE), 2)
+sd_val <- round(sd(data$GCP, na.rm = TRUE), 2)
+min_val <- round(min(data$GCP, na.rm = TRUE), 2)
+max_val <- round(max(data$GCP, na.rm = TRUE), 2)
+
+hist_gcp <- ggplot(data, aes(x = GCP)) +
+  geom_density(fill = "gray85", color = "gray30", alpha = 0.6, 
+               adjust = 1.2, linewidth = 1.5) +
+  geom_vline(xintercept = mean_val, color = "black", 
+             linetype = "dotted", linewidth = 1) +
+  annotate("text", x = mean_val, y = Inf,
+           label = paste0("Mean = ", mean_val, " (SD = ", sd_val, ")"),
+           hjust = 0.5, vjust = 1.8, size = 10, color = "black") +
+  annotate("text", x = min_val, y = Inf, hjust = -0.1, vjust = 4,
+           label = paste0("Skew = ", skew_val,
+                          "\nKurtosis = ", kurt_val,
+                          "\nRange = [", min_val, ", ", max_val, "]"),
+           size = 10, color = "black") +
+  labs(x = "General Cognitive Performance", y = "Density") +
+  theme_minimal() +
+  theme(
+    axis.title = element_text(size = 20, color = "black", face = "bold"),
+    axis.text = element_text(size = 18, color = "black"),
+    plot.title = element_text(size = 20, face = "bold"),
+    axis.line = element_line(color = "black", linewidth = 0.8)
+  )
+
+
+hist_gcp
+
+
+#FACTOR SCORE CORRELATIONS WITH AGE ----
+
+# Define variables
+vars <- c("ORIEN", "MEMORY", "LANG", "EXECFUNC", "VISUAL", "GCP")
+
+# Helper function to plot factor vs age with correlation label
+plot_with_corr <- function(df, yvar, ylab) {
+  
+  # correlation and n
+  r_raw <- cor(df$age, df[[yvar]], use = "complete.obs")
+  r_fmt <- sub("^0\\.", ".", formatC(r_raw, format = "f", digits = 2))
+  r_fmt <- sub("^-0\\.", "-.", r_fmt)  # handle negative values
+  
+  n_val <- sum(!is.na(df$age) & !is.na(df[[yvar]]))
+  
+  # stacked APA label
+  label_text <- paste0(
+    "atop(italic(r) == ", r_fmt,
+    ", italic(n) == ", n_val, ")"
+  )
+  
+  ggplot(df, aes(x = age, y = .data[[yvar]])) +
+    geom_point(color = "gray20", alpha = 0.7) +
+    geom_smooth(method = "lm", se = FALSE, color = "black", size = 1.5) +
+    labs(title = ylab, x = "Age", y = NULL) +
+    
+    annotate("text", x = Inf, y = Inf, label = label_text,
+             hjust = 1.1, vjust = 1.0, size = 10,
+             color = "black", parse = TRUE) +
+    
+    theme_minimal(base_size = 14) +
+    theme(
+      plot.title = element_text(size = 30, face = "bold"),
+      axis.title.y = element_blank(),
+      axis.text = element_text(size = 18, color = "black"),
+      panel.grid.major.x = element_blank(),
+      panel.grid.minor.x = element_blank(),
+      panel.grid.minor.y = element_blank()
+    )
+}
+
+## Create plots for each factor ----
+orien_age    <- plot_with_corr(data, "ORIEN",    "Orientation")
+memory_age   <- plot_with_corr(data, "MEMORY",   "Memory")
+lang_age     <- plot_with_corr(data, "LANG",     "Language")
+execfunc_age <- plot_with_corr(data, "EXECFUNC", "Executive Function")
+visual_age   <- plot_with_corr(data, "VISUAL",   "Visual")
+gcp_age      <- plot_with_corr(data, "GCP",      "Global Cognitive Performance")
+
+
+#show plots
+orien_age
+memory_age
+lang_age
+execfunc_age
+visual_age
+gcp_age
+
+
+
+#FACTOR SCORE CORRELATIONS WITH EDUCATION ----
+
+plot_with_corr <- function(df, yvar, ylab) {
+  r_val <- cor(df$yrschool, df[[yvar]], use = "complete.obs")
+  r_label <- paste0("italic(r) == ", round(r_val, 2))
+  
+  ggplot(df, aes(x = yrschool, y = .data[[yvar]])) +
+    geom_point(color = "darkgray", alpha = 0.7) +
+    geom_smooth(method = "lm", se = FALSE, color = "black", size = 1.5) + 
+    scale_x_continuous(breaks = seq(min(df$yrschool, na.rm = TRUE), 
+                                    max(df$yrschool, na.rm = TRUE), 1)) +
+    labs(title = ylab, x = "Years of Schooling", y = NULL) +
+    annotate("text", x = Inf, y = -Inf, label = r_label,
+             parse = TRUE,
+             hjust = 1.1, vjust = -0.5, size = 10, color = "black") +
+    theme_minimal(base_size = 14) +
+    theme(
+      plot.title = element_text(size = 30, face = "bold"), 
+      axis.title.y = element_blank(),
+      panel.grid.major.x = element_blank(),
+      panel.grid.minor.x = element_blank(),
+      panel.grid.minor.y = element_blank()
+    )
+}
+
+
+## Create each plot ----
+orien_ed <- plot_with_corr(data, "ORIEN", "Orientation")
+mem_ed <- plot_with_corr(data, "MEMORY", "Memory")
+lang_ed <- plot_with_corr(data, "LANG", "Language")
+ef_ed <- plot_with_corr(data, "EXECFUNC", "Executive Function")
+vis_ed <- plot_with_corr(data, "VISUAL", "Visuospatial")
+gcp_ed <- plot_with_corr(data, "GCP", "General Cognitive Functioning")
+
+
+#show plots
+orien_ed
+mem_ed
+lang_ed
+ef_ed
+vis_ed
+gcp_ed
+
+
+
+#FACTOR SCORE CORRELATIONS WITH EDUCATION - WITH SPLINES ----
+
+plot_with_knots_edu <- function(df, yvar, ylab) {
+  # correlation
+  r_val <- cor(df$yrschool, df[[yvar]], use = "complete.obs")
+  
+  # sample size
+  n_val <- sum(complete.cases(df$yrschool, df[[yvar]]))
+  
+  # combined label (stacked, both italicized)
+  label_text <- paste0(
+    "atop(italic(r) == ", round(r_val, 2),
+    ", italic(n) == ", n_val, ")"
+  )
+  
+  knots <- c(1, 6, 10)
+  
+  ggplot(df, aes(x = yrschool, y = .data[[yvar]])) +
+    geom_point(color = "gray20", alpha = 0.4) +
+    geom_smooth(
+      method = "lm",
+      formula = y ~ splines::ns(x, knots = knots),
+      se = TRUE, color = "black", linewidth = 1.2
+    ) +
+    geom_vline(xintercept = knots, color = "black",
+               linetype = "dashed", size = 1.5) +
+    scale_x_continuous(
+      breaks = seq(min(df$yrschool, na.rm = TRUE),
+                   max(df$yrschool, na.rm = TRUE), 1)
+    ) +
+    labs(title = ylab, x = "Years of Schooling", y = NULL) +
+    
+    annotate(
+      "text",
+      x = Inf, y = -Inf,
+      label = label_text,
+      parse = TRUE,
+      hjust = 1.05,   # slightly inside right edge
+      vjust = -1.2,   # pushes it UP from bottom
+      size = 10,
+      color = "black"
+    ) +
+    
+    theme_minimal(base_size = 14) +
+    theme(
+      plot.title = element_text(size = 30, face = "bold"),
+      axis.title.y = element_blank(),
+      axis.text = element_text(size = 18, color = "black"),
+      panel.grid.major.x = element_blank(),
+      panel.grid.minor.x = element_blank(),
+      panel.grid.minor.y = element_blank()
+    )
+}
+
+#Create plots for all domains
+orien_knots <- plot_with_knots_edu(data, "ORIEN", "Orientation")
+mem_knots <- plot_with_knots_edu(data, "MEMORY", "Memory")
+lang_knots <- plot_with_knots_edu(data, "LANG", "Language")
+ef_knots <- plot_with_knots_edu(data, "EXECFUNC", "Executive Function")
+vis_knots <- plot_with_knots_edu(data, "VISUAL", "Visuospatial")
+gcp_knots <- plot_with_knots_edu(data, "GCP", "General Cognitive Functioning")
+
+#Display 
+orien_knots
+mem_knots
+lang_knots 
+ef_knots 
+vis_knots
+gcp_knots 
