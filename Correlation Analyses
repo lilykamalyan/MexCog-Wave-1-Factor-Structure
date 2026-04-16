@@ -2,7 +2,7 @@
 
 # in-person
 data <- read.table(
-  "C:/Users/lk2681.MC/R Files/mexcog2016_postcfa_resub_040726.dat",
+  "C:/Users/lk2681.MC/R Files/mexcog2016_postcfa_resub_041626.dat",
   header = TRUE,
   na.strings = "-999"
 )
@@ -59,20 +59,9 @@ cor_tbl <- purrr::pmap_dfr(
 cor_tbl
 
 
-# histograms of cognitive domains - factor scores ----
+# density plots of cognitive domains - factor scores ----
 
 ## orien_single ----
-
-### basic ----
-
-ggplot(data, aes(x = ORIEN)) +
-  geom_histogram(binwidth = 1, fill = "skyblue", color = "black", alpha = 0.7) +
-  labs(x = "Orientation Factor Score", y = "Frequency") +
-  theme_minimal() +
-  theme(
-    axis.title = element_text(size = 20, color = "black", face = "bold"),   # Axis titles
-    axis.text = element_text(size = 20, color = "black")  # Axis tick labels
-  )
 
 ### density plot without annotations ----
 # Compute mean
@@ -87,7 +76,7 @@ n_label <- plot_with_n(data, "ORIEN")
 
 hist_orien <- ggplot(data, aes(x = ORIEN)) +
   geom_density(fill = "gray85", color = "gray30", alpha = 0.6,
-               adjust = 1.5, linewidth = 1.5) +
+               adjust = 1.7, linewidth = 1.5) +
   geom_vline(xintercept = mean_val, color = "black",
              linetype = "dotted", linewidth = 1) +
   annotate("text", x = Inf, y = Inf,
@@ -153,17 +142,6 @@ hist_orien
 
 
 ## MEMORY ----
-
-### basic ----
-ggplot(data, aes(x = MEMORY)) +
-  geom_histogram(binwidth = 1, fill = "skyblue", color = "black", alpha = 0.7) +
-  labs(x = "Memory Factor Score", y = "Frequency") +
-  theme_minimal() +
-  theme(
-    axis.title = element_text(size = 20, color = "black", face = "bold"),  
-    axis.text = element_text(size = 20, color = "black")  
-  )
-
 
 ### density plot without annotations ----
 # Compute mean
@@ -242,16 +220,6 @@ hist_memory
 
 ## LANG ----
 
-### basic ----
-ggplot(data, aes(x = LANG)) +
-  geom_histogram(binwidth = 1, fill = "skyblue", color = "black", alpha = 0.7) +
-  labs(x = "Language Factor Score", y = "Frequency") +
-  theme_minimal() +
-  theme(
-    axis.title = element_text(size = 20, color = "black", face = "bold"),  
-    axis.text = element_text(size = 20, color = "black")  
-  )
-
 ### density plot without annotations ----
 # Compute mean
 mean_val <- mean(data$LANG, na.rm = TRUE)
@@ -325,17 +293,6 @@ hist_lang
 
 ## VISUAL ----
 
-### basic ----
-ggplot(data, aes(x = VISUAL)) +
-  geom_histogram(binwidth = 1, fill = "skyblue", color = "black", alpha = 0.7) +
-  labs(x = "Visuospatial Factor Score", y = "Frequency") +
-  theme_minimal() +
-  theme(
-    axis.title = element_text(size = 20, color = "black", face = "bold"),  
-    axis.text = element_text(size = 20, color = "black")  
-  )
-
-
 ### density plot without annotations ----
 # Compute mean
 mean_val <- mean(data$VISUAL, na.rm = TRUE)
@@ -408,16 +365,6 @@ hist_vis
 
 
 ## EXECFUNC ----
-
-## basic ----
-ggplot(data, aes(x = EXECFUNC)) +
-  geom_histogram(binwidth = 1, fill = "skyblue", color = "black", alpha = 0.7) +
-  labs(x = "Executive Function Factor Score", y = "Frequency") +
-  theme_minimal() +
-  theme(
-    axis.title = element_text(size = 20, color = "black", face = "bold"),  
-    axis.text = element_text(size = 20, color = "black")  
-  )
 
 
 ### density plot without annotations ----
@@ -493,18 +440,6 @@ hist_exfx
 
 
 ## GCP ----
-
-### basic ----
-ggplot(data, aes(x = GCP)) +
-  geom_histogram(binwidth = 1, fill = "skyblue", color = "black", alpha = 0.7) +
-  labs(x = "Visuospatial Factor Score", y = "Frequency") +
-  theme_minimal() +
-  theme(
-    axis.title = element_text(size = 20, color = "black", face = "bold"),  
-    axis.text = element_text(size = 20, color = "black")  
-  )
-
-
 
 ### density plot without annotations ----
 # Compute mean
@@ -614,7 +549,8 @@ plot_with_corr <- function(df, yvar, ylab) {
       axis.text = element_text(size = 18, color = "black"),
       panel.grid.major.x = element_blank(),
       panel.grid.minor.x = element_blank(),
-      panel.grid.minor.y = element_blank()
+      panel.grid.minor.y = element_blank(), 
+      axis.line = element_line(color = "black", linewidth = 0.8)
     )
 }
 
@@ -658,7 +594,8 @@ plot_with_corr <- function(df, yvar, ylab) {
       axis.title.y = element_blank(),
       panel.grid.major.x = element_blank(),
       panel.grid.minor.x = element_blank(),
-      panel.grid.minor.y = element_blank()
+      panel.grid.minor.y = element_blank(), 
+      axis.line = element_line(color = "black", linewidth = 0.8)
     )
 }
 
@@ -732,7 +669,8 @@ plot_with_knots_edu <- function(df, yvar, ylab) {
       axis.text = element_text(size = 18, color = "black"),
       panel.grid.major.x = element_blank(),
       panel.grid.minor.x = element_blank(),
-      panel.grid.minor.y = element_blank()
+      panel.grid.minor.y = element_blank(), 
+      axis.line = element_line(color = "black", linewidth = 0.8)
     )
 }
 
