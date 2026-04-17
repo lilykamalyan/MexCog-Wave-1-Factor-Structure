@@ -364,12 +364,12 @@ output_lines[svalues_start:length(output_lines)]
 orientation_scores_model <- mplusObject(
   
   MODEL = "
-orien BY day*0.76066
-month*1.31844
-wkday*0.61196
-year*2.03978
-country*0.75212
-state*0.86510;
+orien BY day@0.76066
+month@1.31844
+wkday@0.61196
+year@2.03978
+country@0.75212
+state@0.86510;
 
 dm BY month@1
 day@1;
@@ -381,16 +381,16 @@ dm WITH orien@0;
 dm WITH sc@0;
 sc WITH orien@0;
 
-[day$1*-0.54089];
-[month$1*-2.22037];
-[year$1*-1.43365];
-[wkday$1*-1.87993];
-[country$1*-0.69425];
-[state$1*-1.54300];
+[day$1@-0.54089];
+[month$1@-2.22037];
+[year$1@-1.43365];
+[wkday$1@-1.87993];
+[country$1@-0.69425];
+[state$1@-1.54300];
 
 orien@1;
-dm*0.37808;
-sc*0.97518; 
+dm@0.37808;
+sc@0.97518; 
 ",
   
   usevariables = colnames(orientation_data),
@@ -443,16 +443,16 @@ mean(scores$ORIEN, na.rm = TRUE)
 memory_scores_model <- mplusObject(
   
   MODEL = "
-memory BY braveimm*0.77656
-bravedel*0.74349
-ceradimm*3.53397
-ceraddel*1.64591
-ceradrec*1.90758
-lmimm*2.67799
-lmdelay*2.37619
-mmseimm*0.77588
-mmsedel*0.62166
-figdel*1.86877;
+memory BY braveimm@0.77656
+bravedel@0.74349
+ceradimm@3.53397
+ceraddel@1.64591
+ceradrec@1.90758
+lmimm@2.67799
+lmdelay@2.37619
+mmseimm@0.77588
+mmsedel@0.62166
+figdel@1.86877;
 
 bv BY braveimm@1
 bravedel@1;
@@ -475,34 +475,34 @@ lm WITH memory@0
 mm@0;
 mm WITH memory@0;
 
-[ceradimm*12.60809];
-[braveimm*2.01091];
-[lmimm*4.87058];
-[ceraddel*3.16966];
-[bravedel*1.43809];
-[lmdelay*3.16387];
-[ceradrec*16.58516];
-[figdel*5.50116];
-[mmseimm$1*-3.66851];
-[mmseimm$2*-2.93672];
-[mmseimm$3*-1.91801];
-[mmsedel$1*-1.64468];
-[mmsedel$2*-0.85039];
-[mmsedel$3*0.28088];
+[ceradimm@12.60809];
+[braveimm@2.01091];
+[lmimm@4.87058];
+[ceraddel@3.16966];
+[bravedel@1.43809];
+[lmdelay@3.16387];
+[ceradrec@16.58516];
+[figdel@5.50116];
+[mmseimm$1@-3.66851];
+[mmseimm$2@-2.93672];
+[mmseimm$3@-1.91801];
+[mmsedel$1@-1.64468];
+[mmsedel$2@-0.85039];
+[mmsedel$3@0.28088];
 
-ceradimm*7.93056;
-braveimm*0.80322;
-lmimm*2.98435;
-ceraddel*1.80438;
-bravedel*0.54631;
-lmdelay*2.28894;
-ceradrec*5.60776;
-figdel*7.52422;
+ceradimm@7.93056;
+braveimm@0.80322;
+lmimm@2.98435;
+ceraddel@1.80438;
+bravedel@0.54631;
+lmdelay@2.28894;
+ceradrec@5.60776;
+figdel@7.52422;
 memory@1;
-bv*1.25942;
-cr*1.14889;
-lm*3.52189;
-mm*0.24242;
+bv@1.25942;
+cr@1.14889;
+lm@3.52189;
+mm@0.24242;
 ",
   
   usevariables = colnames(memory_data),
@@ -551,21 +551,22 @@ mean(scores$MEMORY, na.rm = TRUE)
 
 
 
+
 ##language ----
 language_scores_model <- mplusObject(
   
   MODEL = "
-lang BY animals*3.52647;
-lang BY shoe*0.75932;
-lang BY pencil*0.86405;
-lang BY scissors*0.68058;
-lang BY bridge*0.74413;
-lang BY hammer*0.83891;
-lang BY mmserep*0.92389;
-lang BY reading*1.28788;
-lang BY writing*0.77914;
-lang BY twostep*1.02995;
-lang BY thrstep*0.58472;
+lang BY animals@3.52647;
+lang BY shoe@0.75932;
+lang BY pencil@0.86405;
+lang BY scissors@0.68058;
+lang BY bridge@0.74413;
+lang BY hammer@0.83891;
+lang BY mmserep@0.92389;
+lang BY reading@1.28788;
+lang BY writing@0.77914;
+lang BY twostep@1.02995;
+lang BY thrstep@0.58472;
 
 ps BY pencil@1;
 ps BY shoe@1;
@@ -576,26 +577,26 @@ ps WITH lang@0;
 ps WITH hb@0;
 hb WITH lang@0;
 
-[animals*15.06262];
+[animals@15.06262];
 
-[shoe$1*-3.54315];
-[pencil$1*-3.12432];
-[bridge$1*-1.13316];
-[hammer$1*-2.71607];
-[scissors$1*-2.71207];
-[mmserep$1*-1.75679];
-[reading$1*-1.63235];
-[writing$1*-1.25035];
-[twostep$1*-2.71126];
-[twostep$2*-2.27967];
-[thrstep$1*-2.17798];
-[thrstep$2*-1.38235];
-[thrstep$3*-0.35586];
+[shoe$1@-3.54315];
+[pencil$1@-3.12432];
+[bridge$1@-1.13316];
+[hammer$1@-2.71607];
+[scissors$1@-2.71207];
+[mmserep$1@-1.75679];
+[reading$1@-1.63235];
+[writing$1@-1.25035];
+[twostep$1@-2.71126];
+[twostep$2@-2.27967];
+[thrstep$1@-2.17798];
+[thrstep$2@-1.38235];
+[thrstep$3@-0.35586];
 
-animals*17.35888;
+animals@17.35888;
 lang@1;
-ps*1.12064;
-hb*0.44886;
+ps@1.12064;
+hb@0.44886;
 ",
   
   usevariables = colnames(language_data_2),
@@ -650,12 +651,12 @@ mean(scores_lang$LANG, na.rm = TRUE)
 execfunc_scores_model <- mplusObject(
   
   MODEL = "
-execfunc BY gonogo*1.30520;
-execfunc BY visscan*12.37671;
-execfunc BY symdig*11.19512;
-execfunc BY bkwdcnt*1.13977;
-execfunc BY similar*0.71795;
-execfunc BY serthr*0.71262;
+execfunc BY gonogo@1.30520;
+execfunc BY visscan@12.37671;
+execfunc BY symdig@11.19512;
+execfunc BY bkwdcnt@1.13977;
+execfunc BY similar@0.71795;
+execfunc BY serthr@0.71262;
 
 sv BY symdig@1;
 sv BY visscan@1;
@@ -665,31 +666,31 @@ bs BY serthr@1;
 
 sv WITH execfunc@0;
 bs WITH execfunc@0;
-bs WITH sv*-1.34561;
+bs WITH sv@-1.34561;
 
-[ visscan*27.12004 ];
-[ bkwdcnt*3.88489 ];
-[ symdig*21.18834 ];
-[ gonogo*8.09931 ];
+[ visscan@27.12004 ];
+[ bkwdcnt@3.88489 ];
+[ symdig@21.18834 ];
+[ gonogo@8.09931 ];
 
-[ similar$1*-0.62297 ];
-[ similar$2*0.82377 ];
-[ similar$3*2.33030 ];
+[ similar$1@-0.62297 ];
+[ similar$2@0.82377 ];
+[ similar$3@2.33030 ];
 
-[ serthr$1*-2.20248 ];
-[ serthr$2*-1.49467 ];
-[ serthr$3*-1.10004 ];
-[ serthr$4*-0.56286 ];
-[ serthr$5*0.46089 ];
+[ serthr$1@-2.20248 ];
+[ serthr$2@-1.49467 ];
+[ serthr$3@-1.10004 ];
+[ serthr$4@-0.56286 ];
+[ serthr$5@0.46089 ];
 
-visscan*72.24646;
-bkwdcnt*1.52751;
-symdig*26.83351;
-gonogo*3.30785;
+visscan@72.24646;
+bkwdcnt@1.52751;
+symdig@26.83351;
+gonogo@3.30785;
 
 execfunc@1;
-sv*25.14556;
-bs*0.33511;
+sv@25.14556;
+bs@0.33511;
   ",
   
   usevariables = colnames(execfunc_data),
@@ -795,4 +796,5 @@ visual_scores$output
 scores_visual <- visual_scores$savedata
 sd(scores_visual$VISUAL, na.rm = TRUE)
 mean(scores_visual$VISUAL, na.rm = TRUE)
+
 
