@@ -1,7 +1,7 @@
 #OVERALL SAMPLE - FINAL MODELS - WITH CLUSTER ID ----
 
 data <- read.table(
-  "C:/Users/lk2681.MC/R Files/mexcog2016_forcfa_040726_hhid_USE.dat",
+  "FILEPATHTODATA/DATA",
   header = FALSE,
   na.strings = "-999"
 )
