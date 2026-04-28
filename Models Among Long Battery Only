@@ -4,7 +4,7 @@
 #those participants were selected out into a new dataset
 
 data <- read.table(
-  "C:/Users/lk2681.MC/R Files/mexcog2016_forcfa_040726_hhid_long_USE.dat",
+  "FILEPATHTODATA/DATA",
   header = FALSE,
   na.strings = "-999"
 )
