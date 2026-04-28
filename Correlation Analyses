@@ -11,10 +11,8 @@ summary(data)
 
 ##within factor scores ----
 
-# your variables
+# variables
 vars <- c("ORIEN", "MEMORY", "LANG", "EXECFUNC", "VISUAL", "GCP")
-
-# make combinations
 combos <- t(combn(vars, 2))   # each row: c(var1, var2)
 
 # function to compute cor + CI for a pair
@@ -57,6 +55,40 @@ cor_tbl <- purrr::pmap_dfr(
 
 # view result
 cor_tbl
+
+
+cor_mat <- cor_tbl %>%
+  
+  # keep formatted string
+  select(var1, var2, r_ci) %>%
+  
+  # add reversed pairs for symmetry
+  bind_rows(
+    cor_tbl %>%
+      select(var1 = var2, var2 = var1, r_ci)
+  ) %>%
+  
+  # add diagonal
+  bind_rows(
+    tibble(var1 = vars, var2 = vars, r_ci = "—")
+  ) %>%
+  
+  # enforce ordering
+  mutate(
+    var1 = factor(var1, levels = vars),
+    var2 = factor(var2, levels = vars)
+  ) %>%
+  
+  # reshape to wide
+  pivot_wider(
+    names_from = var2,
+    values_from = r_ci
+  ) %>%
+  
+  arrange(var1)
+
+#view table
+cor_mat   
 
 
 # density plots of cognitive domains - factor scores ----
