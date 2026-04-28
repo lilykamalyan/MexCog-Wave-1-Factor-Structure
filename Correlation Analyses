@@ -2,7 +2,7 @@
 
 # in-person
 data <- read.table(
-  "C:/Users/lk2681.MC/R Files/mexcog2016_postcfa_resub_041626.dat",
+  "FILEPATHTODATA/DATA",
   header = TRUE,
   na.strings = "-999"
 )
