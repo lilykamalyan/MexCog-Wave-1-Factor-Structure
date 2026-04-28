@@ -16,7 +16,7 @@ library(lspline)
 #OVERALL SAMPLE - FINAL MODELS ----
 
 data <- read.table(
-  "C:/Users/lk2681.MC/R Files/mexcog2016_forcfa_040726_USE.dat",
+  "FILEPATHTODATA/DATA",
   header = FALSE,
   na.strings = "-999"
 )
