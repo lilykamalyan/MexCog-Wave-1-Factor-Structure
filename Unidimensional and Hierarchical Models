@@ -75,6 +75,7 @@ CATEGORICAL = day month year wkday country state;
   
   ANALYSIS = "
 ESTIMATOR = WLSMV;
+PARAMETERIZATION = THETA;
 ",
   
   OUTPUT = "
