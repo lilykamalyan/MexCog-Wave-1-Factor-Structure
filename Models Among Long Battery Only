@@ -396,7 +396,7 @@ fourfig WITH figdel;
 symdig WITH reading;
 symdig WITH writing;
 visscan WITH reading;
-visscan WITH reading;
+visscan WITH writing;
 ",
   
   usevariables = colnames(gcp_data_long),
