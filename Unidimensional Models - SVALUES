@@ -96,6 +96,11 @@ memory BY braveimm* bravedel
             cr WITH lm@0;
             cr WITH mm@0;
             lm WITH mm@0;
+
+            mm@1;
+            bv@1;
+            cr@1;
+            lm@1;
 ",
   
   usevariables = colnames(memory_data),
@@ -180,6 +185,9 @@ hb BY bridge@1;
 hb WITH lang@0;
 
 ps WITH hb@0;
+
+ps@1;
+hb@1;
 ",
   
   usevariables = colnames(language_data_2),
@@ -251,6 +259,9 @@ bs BY serthr@1;
 bs WITH execfunc@0;
 
 sv WITH bs@1;
+
+sv@1;
+bs@1;
 ",
   
   usevariables = colnames(execfunc_data),
