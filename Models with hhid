@@ -22,7 +22,6 @@ colnames(data)  # confirm order
 summary(data)
 
 ##orientation ----
-
 orientation_data_hhid <- data %>%
   dplyr::select(
     id, hhid,
@@ -35,13 +34,8 @@ orientation_data_hhid <- data %>%
 orientation_model_hhid <- mplusObject(
   
   MODEL = "
-orien BY
-day
-month
-year
-wkday
-country
-state;
+orien BY day* month year wkday country state;
+orien@1;
 ",
 
   usevariables = colnames(orientation_data_hhid),
@@ -80,7 +74,6 @@ orientation_final_hhid$output
 
 
 ##memory ----
-
 memory_data_hhid <- data %>% 
   dplyr::select(
     id, hhid,
@@ -101,23 +94,18 @@ memory_data_hhid <- data %>%
 mem_final_model_hhid <- mplusObject(
   
   MODEL = "
-memory BY
-mmseimm
-mmsedel
-ceradimm
-ceraddel
-ceradrec
-braveimm
-bravedel
-lmimm
-lmdelay
-figdel;
-mmseimm WITH mmsedel;
-ceradimm WITH ceraddel;
-ceradimm WITH ceradrec;
-ceraddel WITH ceradrec;
-braveimm WITH bravedel;
-lmimm WITH lmdelay;
+memory BY mmseimm* mmsedel 
+          ceradimm ceraddel 
+          ceradrec braveimm bravedel lmimm 
+          lmdelay figdel;
+          memory@1;
+
+          mmseimm WITH mmsedel;
+          ceradimm WITH ceraddel;
+          ceradimm WITH ceradrec;
+          ceraddel WITH ceradrec;
+          braveimm WITH bravedel;
+          lmimm WITH lmdelay;
 ",
   
   usevariables = colnames(memory_data_hhid),
@@ -156,8 +144,10 @@ mem_final_hhid
 mem_final_hhid$output
 
 
-##language ----
 
+
+
+##language ----
 language_data_hhid <- data %>%
   dplyr::select(
     id, hhid,
@@ -181,12 +171,14 @@ language_data_hhid <- data %>%
 language_model_hhid <- mplusObject(
   
   MODEL = "
-lang BY animals shoe pencil scissors
+lang BY animals* shoe pencil scissors
          bridge hammer mmserep reading writing
          twostep thrstep;
+         
+         lang@1;
 
-pencil WITH shoe;
-hammer WITH bridge;
+        pencil WITH shoe;
+        hammer WITH bridge;
 ",
   
   
@@ -235,7 +227,6 @@ language_final_hhid$output
 
 
 ##executive functioning ----
-
 execfunc_data_hhid <- data %>%
   dplyr::select(
     id, hhid,
@@ -247,9 +238,11 @@ execfunc_data_hhid <- data %>%
 execfunc_model_hhid <- mplusObject(
   
   MODEL = "
-execfunc BY visscan bkwdcnt symdig similar gonogo serthr;
-visscan WITH symdig;
-serthr WITH bkwdcnt;
+execfunc BY visscan* bkwdcnt symdig similar gonogo serthr;
+          execfunc@1;
+            
+          visscan WITH symdig;
+          serthr WITH bkwdcnt;
 ",
   
   usevariables = colnames(execfunc_data_hhid),
@@ -288,8 +281,11 @@ execfunc_final_hhid
 execfunc_final_hhid$output
 
 
-##visuospatial ----
 
+
+
+
+##visuospatial ----
 visual_data_hhid <- data %>%
   dplyr::select(
     id, hhid,
@@ -344,7 +340,6 @@ visual_final_hhid$output
 
 
 ##2nd order model GCP ----
-
 gcp_data_hhid <- data %>%
   dplyr::select(
     id, hhid,
@@ -370,19 +365,26 @@ gcp_data_hhid <- data %>%
 gcp_model_hhid <- mplusObject(
   
   MODEL = "
-orien BY day month year wkday country state;
+orien BY day* month year wkday country state;
+orien@1;
 
-memory BY mmseimm ceradimm braveimm lmimm mmsedel ceraddel
+memory BY mmseimm* ceradimm braveimm lmimm mmsedel ceraddel
        bravedel lmdelay ceradrec figdel;
+memory@1;
 
-lang BY animals shoe pencil scissors bridge hammer mmserep
+lang BY animals* shoe pencil scissors bridge hammer mmserep
       reading writing twostep thrstep;
+lang@1;
 
-execfunc BY visscan bkwdcnt symdig similar gonogo serthr;
+execfunc BY visscan* bkwdcnt symdig similar gonogo serthr;
+execfunc@1;
 
-visual BY fourfig onefig;
+visual BY fourfig* (1);
+visual BY onefig (1);
+visual@1;
 
-gcp BY orien memory lang execfunc visual;
+gcp BY orien* memory lang execfunc visual;
+gcp@1;
 
 mmseimm WITH mmsedel;
 ceradimm WITH ceraddel;
@@ -444,7 +446,3 @@ gcp_final_hhid <- mplusModeler(
 )
 
 gcp_final_hhid
-
-gcp_final_hhid <- readModels("gcp_final_hhid.out")
-
-gcp_final_hhid$output
