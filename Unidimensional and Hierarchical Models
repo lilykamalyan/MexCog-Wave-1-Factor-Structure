@@ -37,6 +37,46 @@ summary(data)
 ncol(data)     # should be 47
 colnames(data) # confirm order
 
+# check missingness ----
+
+#orientation
+orien_vars <- c("day", "month", "year", "wkday", "country", "state")
+orien_missing <- apply(data[, orien_vars], 1, function(x) all(is.na(x)))
+sum(orien_missing)  # how many cases missing on all variables
+
+#memory
+
+memory_vars <- c("mmseimm", "ceradimm", "braveimm", 
+                 "lmimm", "mmsedel", "ceraddel", 
+                 "bravedel", "lmdelay", "ceradrec", "figdel" )
+memory_missing <- apply(data[, memory_vars], 1, function(x) all(is.na(x)))
+sum(memory_missing) # how many cases missing on all variables
+
+
+#language
+
+lang_vars <- c("animals", "shoe", "pencil", 
+                 "elbow", "bridge", "hammer", 
+                 "scissors", "mmserep", "reading", 
+               "writing", "twostep", "thrstep" )
+lang_missing <- apply(data[, lang_vars], 1, function(x) all(is.na(x)))
+sum(lang_missing) # how many cases missing on all variables
+
+#execfunc
+
+exfx_vars <- c("visscan", "bkwdcnt", "symdig", 
+               "similar", "gonogo", "serthr")
+exfx_missing <- apply(data[, exfx_vars], 1, function(x) all(is.na(x)))
+sum(exfx_missing) # how many cases missing on all variables
+
+#visuospatial
+
+vis_vars <- c("onefig", "fourfig")
+vis_missing <- apply(data[, vis_vars], 1, function(x) all(is.na(x)))
+sum(vis_missing) # how many cases missing on all variables
+
+
+#RUN FINAL CFA MODELS ----
 ##orientation ----
 
 orientation_data <- data %>%
@@ -56,13 +96,8 @@ orientation_data <- data %>%
 orientation_model <- mplusObject(
   
   MODEL = "
-orien BY
-day
-month
-year
-wkday
-country
-state;
+orien BY day* month year wkday country state;
+orien@1;
 ",
   
   usevariables = colnames(orientation_data),
@@ -129,24 +164,18 @@ memory_data <- data %>%
 
 mem_final_model <- mplusObject(
   
-  MODEL = "
-memory BY
-mmseimm
-mmsedel
-ceradimm
-ceraddel
-ceradrec
-braveimm
-bravedel
-lmimm
-lmdelay
-figdel;
-mmseimm WITH mmsedel;
-ceradimm WITH ceraddel;
-ceradimm WITH ceradrec;
-ceraddel WITH ceradrec;
-braveimm WITH bravedel;
-lmimm WITH lmdelay;
+  MODEL = "memory BY mmseimm* mmsedel 
+          ceradimm ceraddel 
+          ceradrec braveimm bravedel lmimm 
+          lmdelay figdel;
+          memory@1;
+
+          mmseimm WITH mmsedel;
+          ceradimm WITH ceraddel;
+          ceradimm WITH ceradrec;
+          ceraddel WITH ceradrec;
+          braveimm WITH bravedel;
+          lmimm WITH lmdelay;
 ",
   
   usevariables = colnames(memory_data),
@@ -210,13 +239,14 @@ language_data <- data %>%
 
 language_model <- mplusObject(
   
-  MODEL = "
-lang BY animals shoe pencil scissors
+  MODEL = "lang BY animals* shoe pencil scissors
          bridge hammer mmserep reading writing
          twostep thrstep;
+         
+         lang@1;
 
-pencil WITH shoe;
-hammer WITH bridge;
+        pencil WITH shoe;
+        hammer WITH bridge;
 ",
   
   usevariables = colnames(language_data),
@@ -276,10 +306,11 @@ execfunc_data <- data %>%
 
 execfunc_model <- mplusObject(
   
-  MODEL = "
-execfunc BY visscan bkwdcnt symdig similar gonogo serthr;
-visscan WITH symdig;
-serthr WITH bkwdcnt;
+  MODEL = "execfunc BY visscan* bkwdcnt symdig similar gonogo serthr;
+          execfunc@1;
+            
+          visscan WITH symdig;
+          serthr WITH bkwdcnt;
 ",
   
   usevariables = colnames(execfunc_data),
@@ -370,7 +401,6 @@ visual_final
 visual_final$output
 
 
-
 ##2nd order model GCP ----
 
 gcp_data <- data %>%
@@ -394,19 +424,26 @@ gcp_data <- data %>%
 gcp_model <- mplusObject(
   
   MODEL = "
-orien BY day month year wkday country state;
+orien BY day* month year wkday country state;
+orien@1;
 
-memory BY mmseimm ceradimm braveimm lmimm mmsedel ceraddel
+memory BY mmseimm* ceradimm braveimm lmimm mmsedel ceraddel
        bravedel lmdelay ceradrec figdel;
+memory@1;
 
-lang BY animals shoe pencil scissors bridge hammer mmserep
+lang BY animals* shoe pencil scissors bridge hammer mmserep
       reading writing twostep thrstep;
+lang@1;
 
-execfunc BY visscan bkwdcnt symdig similar gonogo serthr;
+execfunc BY visscan* bkwdcnt symdig similar gonogo serthr;
+execfunc@1;
 
-visual BY fourfig onefig;
+visual BY fourfig* (1);
+visual BY onefig (1);
+visual@1;
 
-gcp BY orien memory lang execfunc visual;
+gcp BY orien* memory lang execfunc visual;
+gcp@1;
 
 mmseimm WITH mmsedel;
 ceradimm WITH ceraddel;
