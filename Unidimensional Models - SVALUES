@@ -20,8 +20,7 @@ orientation_svalues_model <- mplusObject(
   
   MODEL = "
 orien BY day* month wkday year country state;
-orien@1;
-",
+orien@1;",
   
   usevariables = colnames(orientation_data),
   
@@ -96,7 +95,7 @@ memory BY braveimm* bravedel
             cr WITH lm@0;
             cr WITH mm@0;
             lm WITH mm@0;
-
+            
             mm@1;
             bv@1;
             cr@1;
@@ -112,8 +111,8 @@ CATEGORICAL = mmseimm mmsedel;
 ",
   
   ANALYSIS = "
-ESTIMATOR = WLSMV;
-PARAMETERIZATION = THETA;
+ESTIMATOR = MLR;
+LINK = PROBIT;
 ",
   
   OUTPUT = "
@@ -230,6 +229,7 @@ output_lines[svalues_start:length(output_lines)]
 
 
 ##executive functioning ----
+
 execfunc_data <- data %>%
   dplyr::select(
     id,
@@ -247,7 +247,7 @@ execfunc_data <- data %>%
 execfunc_svalues_model <- mplusObject(
   
   MODEL = "
-execfunc BY gonogo* visscan symdig bkwdcnt similar serthr;
+execfunc BY visscan* bkwdcnt symdig similar gonogo serthr;
 execfunc@1;
 
 sv BY symdig@1;
@@ -258,10 +258,10 @@ bs BY bkwdcnt@1;
 bs BY serthr@1;
 bs WITH execfunc@0;
 
-sv WITH bs@1;
+sv WITH bs@0;
 
-sv@1;
 bs@1;
+sv@1;
 ",
   
   usevariables = colnames(execfunc_data),
@@ -273,8 +273,8 @@ CATEGORICAL = similar serthr;
 ",
   
   ANALYSIS = "
-ESTIMATOR = WLSMV;
-PARAMETERIZATION = THETA;
+ESTIMATOR = MLR;
+LINK = PROBIT;
 ",
   
   OUTPUT = "
@@ -300,6 +300,8 @@ execfunc_svalues <- readModels("execfunc_svalues.out")
 output_lines <- execfunc_svalues$output
 svalues_start <- grep("STARTING VALUES", output_lines)
 output_lines[svalues_start:length(output_lines)]
+
+
 
 
 ##visuospatial skills ----
@@ -331,8 +333,8 @@ CATEGORICAL = onefig;
 ",
   
   ANALYSIS = "
-ESTIMATOR = WLSMV;
-PARAMETERIZATION = THETA;
+ESTIMATOR = MLR;
+LINK = PROBIT;
 ",
   
   OUTPUT = "
@@ -384,7 +386,8 @@ orientation_scores_model <- mplusObject(
      [ country$1@-0.53077 ];
      [ state$1@-1.20871 ];
 
-     orien@1; 
+     orien@1;
+
 ",
   
   usevariables = colnames(orientation_data),
@@ -437,66 +440,67 @@ mean(scores$ORIEN, na.rm = TRUE)
 memory_scores_model <- mplusObject(
   
   MODEL = "
-memory BY braveimm@0.77656
-bravedel@0.74349
-ceradimm@3.53397
-ceraddel@1.64591
-ceradrec@1.90758
-lmimm@2.67799
-lmdelay@2.37619
-mmseimm@0.77588
-mmsedel@0.62166
-figdel@1.86877;
+memory BY braveimm@0.91143;
+     memory BY bravedel@0.86980;
+     memory BY ceradimm@3.33963;
+     memory BY ceraddel@1.62779;
+     memory BY ceradrec@1.92355;
+     memory BY lmimm@3.18591;
+     memory BY lmdelay@2.85551;
+     memory BY mmseimm@0.93179;
+     memory BY mmsedel@0.72786;
+     memory BY figdel@1.86388;
+     bv BY braveimm@1;
+     bv BY bravedel@1;
+     cr BY ceradimm@1;
+     cr BY ceraddel@1;
+     cr BY ceradrec@1;
+     lm BY lmimm@1;
+     lm BY lmdelay@1;
+     mm BY mmseimm@1;
+     mm BY mmsedel@1;
 
-bv BY braveimm@1
-bravedel@1;
-cr BY ceradimm@1
-ceraddel@1
-ceradrec@1;
-lm BY lmimm@1
-lmdelay@1;
-mm BY mmseimm@1
-mmsedel@1;
+     bv WITH memory@0;
+     bv WITH cr@0;
+     bv WITH lm@0;
+     bv WITH mm@0;
+     cr WITH memory@0;
+     cr WITH lm@0;
+     cr WITH mm@0;
+     lm WITH memory@0;
+     lm WITH mm@0;
+     mm WITH memory@0;
 
-bv WITH memory@0
-cr@0
-lm@0
-mm@0;
-cr WITH memory@0
-lm@0
-mm@0;
-lm WITH memory@0
-mm@0;
-mm WITH memory@0;
+     [ ceradimm@12.60212 ];
+     [ braveimm@1.93587 ];
+     [ lmimm@4.60740 ];
+     [ ceraddel@3.16652 ];
+     [ bravedel@1.36492 ];
+     [ lmdelay@2.92566 ];
+     [ ceradrec@16.39235 ];
+     [ figdel@5.23633 ];
 
-[ceradimm@12.60809];
-[braveimm@2.01091];
-[lmimm@4.87058];
-[ceraddel@3.16966];
-[bravedel@1.43809];
-[lmdelay@3.16387];
-[ceradrec@16.58516];
-[figdel@5.50116];
-[mmseimm$1@-3.66851];
-[mmseimm$2@-2.93672];
-[mmseimm$3@-1.91801];
-[mmsedel$1@-1.64468];
-[mmsedel$2@-0.85039];
-[mmsedel$3@0.28088];
+     [ mmseimm$1@-4.49952 ];
+     [ mmseimm$2@-3.53803 ];
+     [ mmseimm$3@-2.30851 ];
+     [ mmsedel$1@-1.99451 ];
+     [ mmsedel$2@-1.01363 ];
+     [ mmsedel$3@0.34933 ];
 
-ceradimm@7.93056;
-braveimm@0.80322;
-lmimm@2.98435;
-ceraddel@1.80438;
-bravedel@0.54631;
-lmdelay@2.28894;
-ceradrec@5.60776;
-figdel@7.52422;
-memory@1;
-bv@1.25942;
-cr@1.14889;
-lm@3.52189;
-mm@0.24242;
+     ceradimm@8.36230;
+     braveimm@0.80182;
+     lmimm@3.18895;
+     ceraddel@1.78044;
+     bravedel@0.57685;
+     lmdelay@2.81578;
+     ceradrec@5.94972;
+     figdel@7.94539;
+     memory@1;
+     bv@1;
+     cr@1;
+     lm@1;
+     mm@1;
+
 ",
   
   usevariables = colnames(memory_data),
@@ -508,8 +512,8 @@ CATEGORICAL = mmseimm mmsedel;
 ",
   
   ANALYSIS = "
-ESTIMATOR = WLSMV;
-PARAMETERIZATION = THETA;
+ESTIMATOR = MLR;
+LINK = PROBIT;
 ",
   
   OUTPUT = "
@@ -550,47 +554,46 @@ mean(scores$MEMORY, na.rm = TRUE)
 language_scores_model <- mplusObject(
   
   MODEL = "
-lang BY animals@3.52647;
-lang BY shoe@0.75932;
-lang BY pencil@0.86405;
-lang BY scissors@0.68058;
-lang BY bridge@0.74413;
-lang BY hammer@0.83891;
-lang BY mmserep@0.92389;
-lang BY reading@1.28788;
-lang BY writing@0.77914;
-lang BY twostep@1.02995;
-lang BY thrstep@0.58472;
+lang BY animals@3.53143;
+     lang BY shoe@0.73124;
+     lang BY pencil@0.84235;
+     lang BY scissors@0.68294;
+     lang BY bridge@0.85117;
+     lang BY hammer@0.94937;
+     lang BY mmserep@0.92756;
+     lang BY reading@1.29332;
+     lang BY writing@0.77933;
+     lang BY twostep@1.02828;
+     lang BY thrstep@0.58641;
+     ps BY pencil@1;
+     ps BY shoe@1;
+     hb BY hammer@1;
+     hb BY bridge@1;
 
-ps BY pencil@1;
-ps BY shoe@1;
-hb BY hammer@1;
-hb BY bridge@1;
+     ps WITH lang@0;
+     ps WITH hb@0;
+     hb WITH lang@0;
 
-ps WITH lang@0;
-ps WITH hb@0;
-hb WITH lang@0;
+     [ animals@15.05957 ];
 
-[animals@15.06262];
+     [ shoe$1@-3.43805 ];
+     [ pencil$1@-3.03851 ];
+     [ bridge$1@-1.32121 ];
+     [ hammer$1@-3.12332 ];
+     [ scissors$1@-2.71405 ];
+     [ mmserep$1@-1.75920 ];
+     [ reading$1@-1.63623 ];
+     [ writing$1@-1.25052 ];
+     [ twostep$1@-2.70841 ];
+     [ twostep$2@-2.27782 ];
+     [ thrstep$1@-2.17892 ];
+     [ thrstep$2@-1.38300 ];
+     [ thrstep$3@-0.35574 ];
 
-[shoe$1@-3.54315];
-[pencil$1@-3.12432];
-[bridge$1@-1.13316];
-[hammer$1@-2.71607];
-[scissors$1@-2.71207];
-[mmserep$1@-1.75679];
-[reading$1@-1.63235];
-[writing$1@-1.25035];
-[twostep$1@-2.71126];
-[twostep$2@-2.27967];
-[thrstep$1@-2.17798];
-[thrstep$2@-1.38235];
-[thrstep$3@-0.35586];
-
-animals@17.35888;
-lang@1;
-ps@1.12064;
-hb@0.44886;
+     animals@17.33441;
+     lang@1;
+     ps@1;
+     hb@1;
 ",
   
   usevariables = colnames(language_data_2),
@@ -645,12 +648,12 @@ mean(scores_lang$LANG, na.rm = TRUE)
 execfunc_scores_model <- mplusObject(
   
   MODEL = "
-execfunc BY gonogo@1.36174;
-     execfunc BY visscan@11.43577;
-     execfunc BY symdig@10.60372;
-     execfunc BY bkwdcnt@1.09139;
-     execfunc BY similar@0.77248;
-     execfunc BY serthr@0.65872;
+     execfunc BY visscan@13.63344;
+     execfunc BY bkwdcnt@0.98534;
+     execfunc BY symdig@12.72296;
+     execfunc BY similar@0.69079;
+     execfunc BY gonogo@1.26292;
+     execfunc BY serthr@0.71997;
      sv BY symdig@1;
      sv BY visscan@1;
      bs BY bkwdcnt@1;
@@ -660,27 +663,27 @@ execfunc BY gonogo@1.36174;
      sv WITH bs@0;
      bs WITH execfunc@0;
 
-     [ visscan@27.12023 ];
-     [ bkwdcnt@3.88492 ];
-     [ symdig@21.18815 ];
-     [ gonogo@8.09935 ];
+     [ visscan@26.52706 ];
+     [ bkwdcnt@3.85278 ];
+     [ symdig@19.76256 ];
+     [ gonogo@8.01562 ];
 
-     [ similar$1@-0.63946 ];
-     [ similar$2@0.84557 ];
-     [ similar$3@2.39197 ];
-     [ serthr$1@-2.21843 ];
-     [ serthr$2@-1.50544 ];
-     [ serthr$3@-1.10802 ];
-     [ serthr$4@-0.56694 ];
-     [ serthr$5@0.46427 ];
+     [ similar$1@-0.57772 ];
+     [ similar$2@0.84572 ];
+     [ similar$3@2.34748 ];
+     [ serthr$1@-2.36422 ];
+     [ serthr$2@-1.51817 ];
+     [ serthr$3@-1.04414 ];
+     [ serthr$4@-0.41892 ];
+     [ serthr$5@0.69909 ];
 
-     visscan@87.41145;
-     bkwdcnt@1.53468;
-     symdig@21.09658;
-     gonogo@3.15706;
+     visscan@69.94633;
+     bkwdcnt@1.44049;
+     symdig@28.67472;
+     gonogo@3.50161;
      execfunc@1;
-     sv@42.18761;
-     bs@0.43589;
+     sv@1;
+     bs@1;
   ",
   
   usevariables = colnames(execfunc_data),
@@ -692,8 +695,8 @@ CATEGORICAL = similar serthr;
 ",
   
   ANALYSIS = "
-ESTIMATOR = WLSMV;
-PARAMETERIZATION = THETA;
+ESTIMATOR = MLR;
+LINK = PROBIT;
 ",
   
   OUTPUT = "
@@ -755,8 +758,8 @@ CATEGORICAL = onefig;
 ",
   
   ANALYSIS = "
-ESTIMATOR = WLSMV;
-PARAMETERIZATION = THETA;
+ESTIMATOR = MLR;
+LINK = PROBIT;
 ",
   
   OUTPUT = "
@@ -786,5 +789,3 @@ visual_scores$output
 scores_visual <- visual_scores$savedata
 sd(scores_visual$VISUAL, na.rm = TRUE)
 mean(scores_visual$VISUAL, na.rm = TRUE)
-
-
